@@ -45,8 +45,6 @@ define(['text!extraction_pipeline/html_partials/kit_partial.html'], function (ki
     // We have to append to the document or events won't register
     parent.empty().
       append(kitPartialHtml);
-
-    var input = parent.find("input");
     var selector = parent.find(".kitSelect");
     var savePrintBtn = parent.find(".kitSavePrintButton");
     var that = this;
@@ -59,12 +57,6 @@ define(['text!extraction_pipeline/html_partials/kit_partial.html'], function (ki
     $('ul p').addClass("kit");
     $('ul h3').addClass("kit");
 
-    input.on("keypress", function (e) {
-      var key = getKey(e);
-      if (key === 13) {
-        that.owner.childDone(this.owner, "barcodeScanned", this.value);
-      }
-    });
     selector.on("change", function (e) {
       that.owner.setValidState();
     });
