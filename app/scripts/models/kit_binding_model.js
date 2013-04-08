@@ -44,6 +44,7 @@ define([
       this.inputRole = initData["input"];
       this.outputRoleForTube = initData["output"]["tube"];
       this.outputRoleForSC = initData["output"]["spin_column"];
+      this.validKitType = initData["kitType"];
 
       return this;
     },
@@ -63,14 +64,11 @@ define([
     },
     setAllTubesFromCurrentBatch:    function () {
       var that = this;
-      debugger;
       this.batch.items.then(function (items) {
             _.each(items, function (item) {
-              debugger;
               if (item.role === that.inputRole && item.status === "done") {
                   that.fetchResourcePromiseFromUUID(item.uuid)
                       .then(function (rsc) {
-                        debugger;
                         that.addResource(rsc);
                         that.tubes.push(rsc);
                       });
@@ -82,7 +80,7 @@ define([
     },
     findTubeInModelFromBarcode:function (barcode) {
       for (var i = 0; i < this.tubes.length; i++) {
-        if (this.tubes[i].barcode == barcode) return this.tubes[i];
+        if (this.tubes[i].rawJson.tube.labels.barcode.value == barcode.BC) return this.tubes[i];
       }
 
       return null;
@@ -95,38 +93,7 @@ define([
       return null;
     },
     validateKitTubes:function (kitType) {
-      var valid = true;
-      var rna = false;
-      var dna = false;
-      var tubeTypes = [];
-      var pipeline = '';
-
-      pipeline = this.order.pipeline;
-
-      rna = (pipeline.indexOf('RNA') != -1);
-      dna = (pipeline.indexOf('DNA') != -1);
-
-      if (dna) {
-        tubeTypes.push('DNA');
-      }
-      if (rna) {
-        tubeTypes.push('RNA');
-      }
-
-      tubeTypes.sort();
-      kitType.sort();
-
-      if (tubeTypes.length != kitType.length) {
-        valid = false;
-      } else {
-        tubeTypes.forEach(function(tube) {
-          if (kitType.indexOf(tube) == -1) {
-            valid = false;
-          }
-        })
-      }
-
-      return valid;
+      return (this.validKitType == kitType);
     },
     validateTubeUuid:function (data) {
       var valid = false;
@@ -146,6 +113,9 @@ define([
     getRowModel:function (rowNum) {
       var rowModel = {};
 
+      var labware3ExpectedType = (this.validKitType == 'DNA/RNA') ? 'tube' : 'waste_tube';
+      var labware3DisplayBarcode = (this.validKitType == 'DNA/RNA') ? true : false;
+
       if (!this.kitSaved) {
         rowModel = {
           "rowNum":  rowNum,
@@ -161,7 +131,7 @@ define([
             "display_barcode":false
           },
           "labware3":{
-            "expected_type":  "waste_tube",
+            "expected_type":  labware3ExpectedType,
             "display_remove": false,
             "display_barcode":false
           }
@@ -181,9 +151,9 @@ define([
             "display_barcode":true
           },
           "labware3":{
-            "expected_type":  "waste_tube",
+            "expected_type":  labware3ExpectedType,
             "display_remove": false,
-            "display_barcode":false
+            "display_barcode":labware3DisplayBarcode
           }
         };
       }
@@ -262,6 +232,15 @@ define([
                   rowPresenter.childDone("...");
                 });
           });
+    },
+    saveKitCreateBarcodes:function(kitBC) {
+
+      if (this.batch) {
+        this.batch.update({"kit" : kitBC});
+        this.kitSaved = true;
+      }
+
+      this.createMissingSpinColumns();
     }
   });
 

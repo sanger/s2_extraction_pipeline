@@ -32,7 +32,6 @@ define(['extraction_pipeline/views/kit_binding_page_view'
           this.currentView = undefined;
           this.barcodePresenter = undefined;
           this.rowPresenters = [];
-          this.tubeTypes = [];
           this.presenterFactory = presenterFactory;
           return this;
         },
@@ -94,6 +93,8 @@ define(['extraction_pipeline/views/kit_binding_page_view'
             this.rowPresenters[i].setupPresenter(rowModel, jquerySelectionForRow(i));
           }
           this.barcodePresenter.setupPresenter(modelJson, jquerySelectionForBarcode);
+          this.barcodePresenter.focus();
+          this.setValidState();
           return this;
         },
         renderView:            function () {
@@ -111,7 +112,7 @@ define(['extraction_pipeline/views/kit_binding_page_view'
         },
         setValidState:         function () {
 
-          var kitType = this.jquerySelection().find('.kitSelect').val().split('/');
+          var kitType = this.jquerySelection().find('.kitSelect').val();
           var valid = this.kitModel.validateKitTubes(kitType);
           this.currentView.setKitValidState(valid);
 
@@ -158,11 +159,10 @@ define(['extraction_pipeline/views/kit_binding_page_view'
               } else {
                 this.owner.childDone(this, "error", {"message":"Error: The kit isn't validated."});
               }
-            } else if (action == "printBC") {
-              this.kitModel.kitSaved = true;
-              this.kitModel.createMissingSpinColumns();
+            } else if (action == "savePrintBC") {
+              this.kitModel.saveKitCreateBarcodes();
               // TODO : print call here !
-              this.owner.childDone(this, "error", {"message":"Spin Column Barcodes printed"});
+              this.owner.childDone(this, "error", {"message":"Kit saved and Spin Column Barcodes printed"});
               this.setupSubPresenters();
               this.currentView.toggleHeaderEnabled(false);
             }
@@ -174,13 +174,7 @@ define(['extraction_pipeline/views/kit_binding_page_view'
             this.currentView.toggleHeaderEnabled(false);
           }
 
-          if (action == 'tubeFinished') {
-            this.tubeTypes.push(data);
-
-            if (this.tubeTypes.length == this.numRows) {
-              this.setValidState();
-            }
-          } else if (action == "barcodeScanned") {
+          if (action == "barcodeScanned") {
             if (child.labwareModel.expected_type == "tube") {
               this.getTubeFromModel(child, data);
             } else if (child.labwareModel.expected_type == "spin_columns") {
