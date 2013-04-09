@@ -44,6 +44,7 @@ define([
       this.inputRole = initData["input"];
       this.outputRoleForTube = initData["output"]["tube"];
       this.outputRoleForSC = initData["output"]["spin_column"];
+      this.validKitType = initData["kitType"];
 
       return this;
     },
@@ -64,16 +65,16 @@ define([
     setAllTubesFromCurrentBatch:function () {
       var that = this;
       this.batch.items.then(function (items) {
-          _.each(items, function (item) {
-            if (item.role === that.inputRole && item.status === "done") {
-              that.fetchResourcePromiseFromUUID(item.uuid)
-                .then(function (rsc) {
-                  that.addResource(rsc);
-                  that.tubes.push(rsc);
-                });
-            }
-          });
-        }
+            _.each(items, function (item) {
+              if (item.role === that.inputRole && item.status === "done") {
+                  that.fetchResourcePromiseFromUUID(item.uuid)
+                      .then(function (rsc) {
+                        that.addResource(rsc);
+                        that.tubes.push(rsc);
+                      });
+                }
+            });
+          }
       );
 //      this.uuids = this.owner.tubeUUIDs;
     },
@@ -97,38 +98,7 @@ define([
       return null;
     },
     validateKitTubes:function (kitType) {
-      var valid = true;
-      var rna = false;
-      var dna = false;
-      var tubeTypes = [];
-      var pipeline = '';
-
-      pipeline = this.order.pipeline;
-
-      rna = (pipeline.indexOf('RNA') != -1);
-      dna = (pipeline.indexOf('DNA') != -1);
-
-      if (dna) {
-        tubeTypes.push('DNA');
-      }
-      if (rna) {
-        tubeTypes.push('RNA');
-      }
-
-      tubeTypes.sort();
-      kitType.sort();
-
-      if (tubeTypes.length != kitType.length) {
-        valid = false;
-      } else {
-        tubeTypes.forEach(function (tube) {
-          if (kitType.indexOf(tube) == -1) {
-            valid = false;
-          }
-        })
-      }
-
-      return valid;
+      return (this.validKitType == kitType);
     },
     validateTubeUuid:function (data) {
       var valid = false;
@@ -148,6 +118,9 @@ define([
     getRowModel:function (rowNum) {
       var rowModel = {};
 
+      var labware3ExpectedType = (this.validKitType == 'DNA/RNA') ? 'tube' : 'waste_tube';
+      var labware3DisplayBarcode = (this.validKitType == 'DNA/RNA') ? true : false;
+
       if (!this.kitSaved) {
         rowModel = {
           "rowNum":rowNum,
@@ -163,8 +136,8 @@ define([
             "display_barcode":false
           },
           "labware3":{
-            "expected_type":"waste_tube",
-            "display_remove":false,
+            "expected_type":  labware3ExpectedType,
+            "display_remove": false,
             "display_barcode":false
           }
         };
@@ -183,9 +156,9 @@ define([
             "display_barcode":true
           },
           "labware3":{
-            "expected_type":"waste_tube",
-            "display_remove":false,
-            "display_barcode":false
+            "expected_type":  labware3ExpectedType,
+            "display_remove": false,
+            "display_barcode":labware3DisplayBarcode
           }
         };
       }
@@ -222,7 +195,6 @@ define([
               });
           });
         });
-
       $.when.apply(listOfPromises).then(function () {
         that.owner.childDone(that, "success", {});
       }).fail(function () {
@@ -258,7 +230,22 @@ define([
               rowPresenter.childDone("...");
             });
 
-        });
+                  rowPresenter.childDone("...");
+                });
+    },
+    saveKitCreateBarcodes:function() {
+
+      if (this.batch && this.kitBC) {
+        this.batch.update({"kit" : this.kitBC});
+        this.kitSaved = true;
+        this.createMissingSpinColumns();
+        // TODO : print call here !
+        this.owner.setupSubPresenters();
+        this.owner.currentView.toggleHeaderEnabled(false);
+        this.owner.childDone(this, "error", {"message":"Kit saved and Spin Column Barcodes printed"});
+      } else {
+        this.owner.childDone(this, "error", {message: "Kit not saved!"});
+      }
     }
 
   });
