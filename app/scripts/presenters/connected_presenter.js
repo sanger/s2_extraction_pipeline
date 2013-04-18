@@ -77,25 +77,27 @@ define([
           }
         },
 
-        unknownDone:function (child, action, data) {
+        unknownDone: function(child, action, data) {
           if (action === "barcodeScanned") {
             var originator = data.origin;
 
-            // HACK: Identify the input as the first labware presenter in the row
-            if (originator.labwareModel.input && (originator.labwareModel.expected_type === this.config.input.model.singularize())) {
-              this.model.getInputByBarcode(originator, data);
-              this.inputDone(child, action, data);
-            } else if (!originator.labwareModel.input) {
-              this.model.getOutputByBarcode(originator, data);
-              this.outputDone(child, action, data);
+            if (originator.labwareModel) {
+              // HACK: Identify the input as the first labware presenter in the row
+              if (originator.labwareModel.input && (originator.labwareModel.expected_type === this.config.input.model.singularize())) {
+                this.model.getInputByBarcode(originator, data);
+                this.inputDone(child, action, data);
+              } else if (!originator.labwareModel.input) {
+                this.model.getOutputByBarcode(originator, data);
+                this.outputDone(child, action, data);
+              }
             }
           } else if (action === 'completed') {
             this.rowDone(child, action, data);
           }
         },
-        inputDone: function(child, action, data) {
+        inputDone:function (child, action, data) {
         },
-        outputDone: function(child, action, data) {
+        outputDone:function (child, action, data) {
         },
         rowDone: function(child, action, data) {
           if (action === 'completed') {
@@ -145,7 +147,7 @@ define([
               this.currentView.setPrintButtonEnabled(false);
             }
           }
-        },
+        }
       });
       return presenter;
     }

@@ -51,11 +51,22 @@ define([
 
     setValidState:function () {
       var kitType = this.jquerySelection().find('.kitSelect').val();
-      var valid = this.model.validateKitTubes(kitType);
+      var valid = this.model.kitBarcode && this.model.validateKitTubes(kitType);
       this.currentView.setKitValidState(valid);
 
       return valid;
     },
+
+    unknownDone:function(child, action, data){
+      //TODO: How to call the 'super' version of the 'unknownDone' method ??
+      ConnectedPresenter.extend('kit_presenter', Model, View).unknownDone(child, action, data);
+      if (action === "barcodeScanned") {
+        var originator = data.origin;
+        if (originator === this.barcodePresenter) {
+          this.model.addKitBarcode(data.BC);
+        }
+      }
+    }
   });
 
   return Presenter;
