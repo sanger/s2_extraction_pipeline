@@ -49,6 +49,7 @@
 
             "samples.extraction.manual.dna_and_rna.binding_input_tube_nap": {
                 "presenterName":   "kit_presenter",
+                "processTitle":   "Manual DNA and RNA Binding",
                 "behaviours": {
                     "transfer": "row_by_row",
                     "complete": "page_complete"
