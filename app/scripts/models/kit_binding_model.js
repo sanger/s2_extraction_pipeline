@@ -78,11 +78,19 @@ define([
         }
       }).value();
     },
+    addKitBarcode:function(kitBC) {
+      this.kitBarcode = kitBC;
+    },
 
     createOutputs:function(kitBC) {
+      var model = this;
       if (this.batch) {
-        this.batch.update({"kit" : kitBC});
-        this.kitSaved = true;
+        this.batch.update({"kit" : model.kitBarcode}).then(function(){
+          model.kitSaved = true;
+          model.createOutputs();
+        });
+      } else {
+        model.createOutputs();
       }
       Connected.createOutputs.apply(this, []);
     }
@@ -98,7 +106,7 @@ define([
     var that = this;
     this.barcodePresenter.setupPresenter({
       type: "Kit",
-      value: "Kit0001"
+      value: "1234567891011"
     }, function() {
       return that.jquerySelection().find('.barcode')
     });

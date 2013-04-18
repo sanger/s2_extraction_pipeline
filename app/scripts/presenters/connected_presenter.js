@@ -23,6 +23,7 @@ define([
         setupPresenter:function (input_model, jquerySelection) {
           this.jquerySelection = jquerySelection;
           this.model.setBatch(input_model.batch);
+          this.model.setUser(input_model.userUUID);
           this.setupView();
           this.renderView();
           this.setupSubPresenters();
@@ -46,12 +47,22 @@ define([
           return this;
         },
         renderView:function () {
-          this.currentView.renderView();
+          var dataForView = null;
+
+          if (this.model && this.model.config) {
+            dataForView = {
+              batch:this.model.batch && this.model.batch.uuid,
+              user:this.model.user,
+              processTitle:this.model.config.processTitle
+            }
+          }
+
+          this.currentView.renderView(dataForView);
           return this;
         },
 
         checkPageComplete:function () {
-          return _.all(this.rowPresenters, function(presenter) {
+          return _.all(this.rowPresenters, function (presenter) {
             return presenter.isRowComplete();
           });
         },
@@ -70,21 +81,23 @@ define([
           if (action === "barcodeScanned") {
             var originator = data.origin;
 
-            // HACK: Identify the input as the first labware presenter in the row
-            if (originator.labwareModel.input && (originator.labwareModel.expected_type === this.config.input.model.singularize())) {
-              this.model.getInputByBarcode(originator, data);
-              this.inputDone(child, action, data);
-            } else if (!originator.labwareModel.input) {
-              this.model.getOutputByBarcode(originator, data);
-              this.outputDone(child, action, data);
+            if (originator.labwareModel) {
+              // HACK: Identify the input as the first labware presenter in the row
+              if (originator.labwareModel.input && (originator.labwareModel.expected_type === this.config.input.model.singularize())) {
+                this.model.getInputByBarcode(originator, data);
+                this.inputDone(child, action, data);
+              } else if (!originator.labwareModel.input) {
+                this.model.getOutputByBarcode(originator, data);
+                this.outputDone(child, action, data);
+              }
             }
           } else if (action === 'completed') {
             this.rowDone(child, action, data);
           }
         },
-        inputDone: function(child, action, data) {
+        inputDone:function (child, action, data) {
         },
-        outputDone: function(child, action, data) {
+        outputDone:function (child, action, data) {
         },
         rowDone: function(child, action, data) {
           if (action === 'completed') {
@@ -99,6 +112,7 @@ define([
           if (action === "labelPrinted") {
             this.owner.childDone(this, "error", {"message":"Barcodes printed"});
             this.setupSubPresenters(true);
+
             this.currentView.toggleHeaderEnabled(false);
           } else if (action === "allTransferCompleted") {
             this.owner.childDone(this, "error", {"message":"Transfer completed"});
@@ -133,7 +147,7 @@ define([
               this.currentView.setPrintButtonEnabled(false);
             }
           }
-        },
+        }
       });
       return presenter;
     }

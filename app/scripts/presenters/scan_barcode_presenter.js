@@ -70,7 +70,8 @@ define(['extraction_pipeline/models/scan_barcode_model', 'extraction_pipeline/vi
   ScanBarcodePresenter.prototype.handleBarcode = function (barcode) {
     this.model.barcode = barcode;
     var dataForBarcodeScanned = {
-      BC:barcode
+      BC:barcode,
+      origin:this
     };
     this.owner.childDone(this, "barcodeScanned", dataForBarcodeScanned);
 
