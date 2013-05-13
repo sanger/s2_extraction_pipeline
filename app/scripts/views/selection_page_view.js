@@ -38,9 +38,10 @@ define(['text!extraction_pipeline/html_partials/selection_page_partial.html'], f
 
       // set the user and indices as template data
       var templateData = {
-        user:model.user,
-        indices:indices,
-        processTitle:model.processTitle
+        user: model.user,
+        indices: indices,
+        processTitle: model.processTitle,
+        labwareTitle: model.labwareTitle
       };
 
 

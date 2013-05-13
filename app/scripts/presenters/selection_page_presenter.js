@@ -50,7 +50,8 @@ define([ 'config'
         batch:this.model.batch && this.model.batch.uuid,
         user:this.model.user,
         capacity:this.model.getCapacity(),
-        processTitle:this.model.config.processTitle
+        processTitle:this.model.config.processTitle,
+        labwareTitle:this.model.config.input.title
       };
 
       this.view.render(dataForView);
@@ -95,7 +96,8 @@ define([ 'config'
           resource:tube,
           expected_type:presenter.config.input.model.singularize(),
           display_remove:true,
-          display_barcode:false
+          display_barcode:false,
+          title: presenter.config.input.title
         });
       });
 
@@ -103,7 +105,8 @@ define([ 'config'
         expected_type:presenter.config.input.model.singularize(),
         display_remove:false,
         display_barcode:true,
-        display_labware:false
+        display_labware:false,
+        title: presenter.config.input.title
       });
 
       // numTubes + 1 to account for the intermediate barcode scan row
@@ -111,7 +114,8 @@ define([ 'config'
         presenterData.push({
           display_remove:false,
           display_barcode:false,
-          display_labware:false
+          display_labware:false,
+          title: presenter.config.input.title
         });
       });
 
