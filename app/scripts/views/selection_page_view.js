@@ -26,26 +26,14 @@ define(['text!extraction_pipeline/html_partials/selection_page_partial.html'], f
      */
     if (model) {
 
-      //create a list for underscore to iterate through in partial html
-      var indices = new Array();
-
-      for (var i = 1; i <= model.capacity; i++) {
-        indices.push(i);
-      }
-      ;
-
       var template = _.template(selectionPagePartialHtml);
 
-      // set the user and indices as template data
-      var templateData = {
+      this.jquerySelector().html(template({
         user: model.user,
-        indices: indices,
+        numRows: model.capacity,
         processTitle: model.processTitle,
         labwareTitle: model.labwareTitle
-      };
-
-
-      this.jquerySelector().empty().append(template(templateData));
+      }));
       this.attachEvents();
     } else {
       this.jquerySelector().empty().append("loading...");
