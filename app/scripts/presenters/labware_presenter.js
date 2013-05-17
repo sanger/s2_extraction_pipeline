@@ -221,7 +221,7 @@ define(['config'
       });
 
       tmp.appendTo(selection.empty());
-      selection.css('display', 'block');
+      selection.show();
     }
 
   });

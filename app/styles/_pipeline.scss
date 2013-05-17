@@ -3,15 +3,11 @@ header, #content {
 }
 
 ol.labware {
-  font-weight: bold;
   font-size: 24px;
   list-style-position: inside;
   margin-left: 0px;
   li {
     padding: 0px 10px 5px 0px;
-    .title  {
-      display: none;
-    }
   }
   li:nth-child(odd) {
     background-color: #f9f9f9;
@@ -165,12 +161,12 @@ ul {
   .fade.in {
     opacity: 1;
   }
-}
-[class*="row"] {
-  .title  {
-    display: none;
-  }
+
+  height: 60px;
 }
 div.row0 .title {
-  display: block !important;
+  display: block;
+}
+#buttonRack {
+  float: right;
 }
