@@ -174,12 +174,6 @@ define(['config'
     viewDone: function(child, action, data) {
       if (action == "labwareRemoved") {
         this.owner.childDone(this, "removeLabware", { resource: this.labwareModel.resource });
-        this.release();
-        delete this.resource;
-        delete this.resourcePresenter;
-        delete this.barcodeInputPresenter;
-        this.setupPresenter(this.labwareModel, this.jquerySelection);
-        this.renderView();
       }
     },
 
