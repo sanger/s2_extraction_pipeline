@@ -1,11 +1,10 @@
 define([
-  'extraction_pipeline/models/base_page_model'
+  'models/base_page_model'
   , 'mapper/operations'
-  , 'extraction_pipeline/lib/csv_parser'
-  , 'extraction_pipeline/lib/json_templater'
-  , 'extraction_pipeline/lib/reception_templates'
-  , 'extraction_pipeline/lib/reception_studies'
-], function (BasePageModel, Operations, CSVParser, JsonTemplater, ReceptionTemplates, ReceptionStudies) {
+  , 'lib/json_templater'
+  , 'lib/reception_templates'
+  , 'lib/reception_studies'
+], function (BasePageModel, Operations, JsonTemplater, ReceptionTemplates, ReceptionStudies) {
   'use strict';
 
   var ReceptionModel = Object.create(BasePageModel);
