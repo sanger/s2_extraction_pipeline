@@ -49,7 +49,7 @@ define([
         deferred.resolve({
           rack: {
             resourceType: this.plate.resourceType,
-            wells: details,
+            locations: details,
             number_of_rows: this.plate.number_of_rows,
             number_of_columns: this.plate.number_of_columns,
             barcode: this.plate.labels.barcode.value
