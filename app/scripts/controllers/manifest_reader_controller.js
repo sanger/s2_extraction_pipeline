@@ -153,7 +153,6 @@ define(['config'
             thisController.registerBtnSelection.show();
             thisController.createSamplesView(model);
             thisController.hiddenFileInputSelection.attr('disabled', 'disabled');
-//            thisController.barcodeReaderSelection.find('.barcodeInput').focus(); // does not work!!??
             thisController.view.trigger("s2.busybox.end_process");
             deferred.resolve(thisController);
           });
