@@ -40,14 +40,14 @@ define([], function() {
       }
     },
 
-    // Often we need to wrap a particular value in an object, possibly recursively.
-    wrap: function() {
+    // Often we need to build a particular value in an object, possibly recursively.
+    build: function() {
       var path = _.chain(arguments).reverse();
       var pair = path.take(2).value();
 
-      return path.drop(2).reduce(wrap, wrap(pair[0], pair[1])).value();
+      return path.drop(2).reduce(build, build(pair[0], pair[1])).value();
 
-      function wrap(value, name) {
+      function build(value, name) {
         return _.object([[name, value]]);
       }
     }
