@@ -17,14 +17,9 @@ define([
   // Controllers that add extra behaviour, for some reason
   'controllers/kit_controller',
   'controllers/rack_scan_controller',
-  'controllers/reracking_controller',
   'controllers/selection_page_controller',
   'default/default_controller',
   'controllers/volume_control_controller',
-  'controllers/reception_controller',
-  'controllers/lab_activities_controller',
-  'controllers/manifest_maker_controller',
-  'controllers/manifest_reader_controller',
   'controllers/summary_page_controller',
   'controllers/file_generator_controller'
 ], function(TubeController, SpinColumnController, RackController, GelController, PlateController) {
@@ -61,7 +56,10 @@ define([
     var constructor = this.controllers[name] || this.controllers.default;
     return $.extend(
       _.partial(constructor, owner, this).apply(null, _.chain(arguments).drop(2).value()),
-      { className: name }
+      {
+        className: name,
+        localUuid: _.uniqueId()
+      }
     );
   };
 

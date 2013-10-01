@@ -1,5 +1,12 @@
 define([], function() {
   return {
+    // Returns a function that will return the specified value every time it's called
+    constant: function(value) {
+      return function() {
+        return value;
+      };
+    },
+
     // Collapses the given reducible using the function f on every element.  zero is the initial
     // element which, if undefined, is []
     plus: function(reducible, f, zero) {
@@ -68,6 +75,40 @@ define([], function() {
       return function() {
         return f.apply(this, args);
       };
+    },
+
+    // Generates a cross product of the parameters passed.  For example:
+    //   crossProduction([1,2],[3,4]) => [[1,3],[1,4],[2,3],[2,4]]
+    crossProduct: function() {
+      return _.reduce(_.drop(arguments, 1), function(l, r) {
+        return _.reduce(l, function(memo, lv) {
+          return memo.concat(_.map(r, function(lr) { return lv.concat([lr]); }));
+        }, []);
+      }, _.map(arguments[0], function(v) { return [v]; }));
+    },
+
+    // Creates an array containing the times elements, each value
+    repeat: function(value, times) {
+      return _.times(times, _.partial(_.identity, value));
+    },
+
+    // Returns a function that is the complement (negation) of the specified function
+    complement: function(f) {
+      return function() {
+        return !f.apply(this, arguments);
+      }
+    },
+
+    // Returns a function that has the arguments of f in reverse order!
+    flip: function(f) {
+      return function() {
+        return f.apply(this, _.reverse(arguments));
+      }
+    },
+
+    // Reverses the array (cannot believe this isn't in underscore!)
+    reverse: function(array) {
+      return _.reduceRight(array, function(m, v) { m.push(v); return m; }, []);
     }
   };
 });
