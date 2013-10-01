@@ -1,16 +1,17 @@
 require.config({
   shim:{
+
   },
 
   baseUrl: "scripts",
 
   paths:{
-    hm:                   "vendor/hm",
-    esprima:              "vendor/esprima",
-    jquery:               "vendor/jquery.min",
-    bootstrap:            "vendor/bootstrap/bootstrap",
+    jquery:               "../components/jquery/jquery.min",
+    underscore:           "../components/underscore/underscore-min",
+    bootstrap:            "../components/sass-bootstrap/js",
     text:                 "../components/requirejs-text/text",
     spinjs:               "../components/spin.js/spin",
+    components:           "../components",
     labware:              "labware",
     mapper:               "../components/S2Mapper/app/scripts/mapper",
     mapper_services:      "../components/S2Mapper/app/scripts/services",
@@ -23,10 +24,12 @@ require.config({
 });
 
 require([
+  "jquery",
+  "underscore",
   "app",
   "controllers/controller_factory",
-  "bootstrap"
-], function (App, ControllerFactory) {
+  "bootstrap/bootstrap-collapse"
+], function ($, _, App, ControllerFactory) {
   "use strict";
 
   var theApp = new App(new ControllerFactory());
