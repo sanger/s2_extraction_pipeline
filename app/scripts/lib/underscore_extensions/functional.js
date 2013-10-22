@@ -1,5 +1,9 @@
 define([], function() {
   return {
+    // Does nothing, simply ignores everything!
+    ignore: function() {
+    },
+
     // Returns a function that will return the specified value every time it's called
     constant: function(value) {
       return function() {
@@ -97,6 +101,34 @@ define([], function() {
       return function() {
         return !f.apply(this, arguments);
       }
+    },
+
+    // Returns a function that has the arguments of f in reverse order!
+    flip: function(f) {
+      return function() {
+        return f.apply(this, _.reverse(arguments));
+      }
+    },
+
+    // Reverses the array (cannot believe this isn't in underscore!)
+    reverse: function(array) {
+      return _.reduceRight(array, function(m, v) { m.push(v); return m; }, []);
+    },
+
+    // Returns true if the value is considered truthy
+    isTruthy: function(value) {
+      return value;
+    },
+
+    // Higher order function to create a composite function.  Return result is an array
+    // of all return results from the functions passed.
+    composite: function() {
+      var functions = arguments;
+      return function() {
+        var target = this;
+        var args   = arguments;
+        return _.map(functions, function(f) { return f.apply(target, args); });
+      };
     }
   };
 });

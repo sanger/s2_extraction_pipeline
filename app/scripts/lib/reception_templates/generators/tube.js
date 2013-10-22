@@ -16,7 +16,7 @@ define([], function() {
     var registerSamples  = _.partial(preRegisterSamples, numberOfSamples);
     var registerBarcodes = _.partial(preRegisterBarcodes, numberOfBarcodes, model);
     var placeSamples     = function(samples, barcodes, type) { return _.zip(samples, barcodes, _.repeat(type, barcodes.length)); };
-    return callback(registerSamples, registerBarcodes, placeSamples);
+    return callback(registerSamples, registerBarcodes, placeSamples, labelForBarcode);
   }
 
   function createResources(type, callback) {
@@ -37,9 +37,10 @@ define([], function() {
     return memo;
   }
 
-  function createManifest(rows) {
-    var table = _.map(rows, rowHandler);
-    table.unshift(["Tube Barcode", "Sanger Barcode", "Sanger Sample ID", "SAMPLE TYPE"]);
+  function createManifest(rows, extras) {
+    var headers = ["Tube Barcode", "Sanger Barcode", "Sanger Sample ID", "SAMPLE TYPE"];
+    var table   = _.map(rows, rowHandler);
+    table.unshift(headers.concat(_.keys(extras)));
     return table;
 
     function rowHandler(trio) {
@@ -49,7 +50,22 @@ define([], function() {
        label.sanger.prefix + label.sanger.number + label.sanger.suffix,
        sample.sanger_sample_id,
        type
-     ];
+     ].concat(
+       _.map(extras, function(f, h) { return sample[f]; })
+     );
     }
+  }
+
+  function labelForBarcode(barcode) {
+    return {
+      barcode:        {
+        type:  "ean13-barcode",
+        value: barcode.ean13
+      },
+      "sanger label": {
+        type:  "sanger-barcode",
+        value: barcode.sanger.prefix + barcode.sanger.number + barcode.sanger.suffix
+      }
+    };
   }
 });

@@ -1,11 +1,3 @@
-<% if (manifest.errors.length > 0) { %>
-  <div class="alert alert-error">
-    <ul class="unstyled">
-      <% _.each(manifest.errors, function(error) { %><li><%= error %></li><% }); %>
-    </ul>
-  </div>
-<% } %>
-
 <table class="table table-striped table-bordered">
   <thead>
     <tr>
@@ -13,12 +5,15 @@
     </tr>
   </thead>
   <tbody>
-<% _.each(manifest.details, function(details) { %>
-    <% if (details.errors.length > 0) { %><tr class="error"><% } else { %><tr class="success"><% } %>
+<%
+  _.each(manifest.details, function(details) {
+    var css = (details.invalid ? 'error' : (details.errors.length > 0) ? 'warning' : 'success');
+%>
+    <tr class="<%= css %>">
       <% _.each(details.views, function(view) { %><td><%= view %></td><% }); %>
     </tr>
   <% if (details.errors.length > 0) { %>
-    <tr class="error text-error">
+    <tr class="<%= css %> text-error">
       <td colspan="<%= headers.length %>">
         <ul class="unstyled">
           <% _.each(details.errors, function(error) { %><li><%= error %></li><% }); %>

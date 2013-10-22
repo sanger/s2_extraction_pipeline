@@ -2,15 +2,15 @@ define([
     'text!app-components/manifest/_reader.html'
   , 'text!app-components/manifest/_row.html'
   , 'lib/file_handling/manifests'
-  , 'lib/reception_templates'
-  , 'views/drop_zone'
+  , 'app-components/dropzone/dropzone'
 
   // Loaded in the global namespace after this comment
   , 'lib/jquery_extensions'
-], function (componentPartialHtml, sampleRowPartial, CSVParser, ReceptionTemplate, DropZone) {
+], function (componentPartialHtml, sampleRowPartial, CSVParser, DropZone) {
   'use strict';
 
-  var template = _.template(sampleRowPartial);
+  var viewTemplate = _.compose($, _.template(componentPartialHtml));
+  var rowTemplate  = _.template(sampleRowPartial);
 
   // Functions that generate will display a particular value based on the type it should be.
   var CellTemplates = {
@@ -34,6 +34,10 @@ define([
 
     span: templateHelper(function(cell, value) {
       return $("<span />").text(value);
+    }),
+
+    "boolean": templateHelper(function(cell, value) {
+      return $("<span />").text(value ? "Yes" : "No");
     })
   };
 
@@ -53,33 +57,36 @@ define([
   };
 
   function createHtml(context) {
-    var html = $(_.template(componentPartialHtml)());
+    var html = viewTemplate();
 
-    var messageView = html.find(".validationText");
-    var message     = function(type, message) {
-      messageView.removeClass("alert-error alert-info alert-success")
-                 .addClass("alert-"+type)
-                 .html(message)
-                 .show();
+    var message = function(type) {
+      _.chain(arguments).drop(1).each(function(message) {
+        html.trigger("s2.status." + type, message);
+      });
     };
-
-    var error   = _.partial(message, "error");
-    var success = _.partial(message, "success");
+    var error          = _.partial(message, "error");
+    var success        = _.partial(message, "success");
+    var manifestErrors = function(manifest) { error.apply(this, manifest.errors); return manifest; }
 
     // saves the selection for performances
     var manifestTable      = html.find(".orderMaker");
-    var dropzone           = DropZone.init(html.find('.dropzone'));
     var registration       = html.find("#registrationBtn").hide();
     var registrationHelper = registration.dataHelper("manifest");
 
-    dropzone.enable(process(html, warningButton(registration, hideUnhide(dropzone, function(content) {
+    // Configure and establish the dropzone
+    var dropzone = DropZone({
+      mime: "text/csv",
+      message: "Drop the manifest CSV file here, or click to select."
+    });
+    html.find(".dropzone").append(dropzone.view).on(dropzone.events);
+    html.on("dropzone.file", process(html, warningButton(registration, hideUnhide(dropzone.view, function(event, content) {
       return dropZoneLoad(context, registration, manifestTable, content).then(
         _.bind(registrationHelper.manifest, registrationHelper),
-        error
+        manifestErrors
       );
     }))));
 
-    registration.lockingClick(process(html, hideUnhide(dropzone, function(source) {
+    registration.lockingClick(process(html, hideUnhide(dropzone.view, function(source) {
       return createOrder(context, manifestTable, source.data("manifest")).then(
         success,
         error
@@ -88,10 +95,9 @@ define([
 
     _.extend(html, {
       reset: function() {
-        dropzone.show();
+        dropzone.view.show();
         registration.hide();
         manifestTable.empty();
-        messageView.hide();
       }
     });
     return html;
@@ -117,7 +123,8 @@ define([
 
   // Functions handling the generation of view components.
   function normalView(content) {
-    return CellTemplates[content.type || 'span'](content);
+    var template = CellTemplates[content.type || 'span'] || CellTemplates.span;
+    return template(content);
   }
   function errorView(element) {
     $(element, "select,input").attr("disabled", true);
@@ -130,7 +137,10 @@ define([
   // Some utility functions for dealing with processes
   function displayManifest(registerButton, makeOrderButton, manifest) {
     registerButton.show();
-    createSamplesView(makeOrderButton, manifest);
+    if (manifest.details.length > 0) {
+      createSamplesView(makeOrderButton, manifest);
+      makeOrderButton.show();
+    }
     return manifest;
   }
 
@@ -154,7 +164,7 @@ define([
       _.each(manifest.details, _.compose(generateView, _.partial(updateDisplay, manifest.template.json_template_display)));
       data.headers = _.map(manifest.details[0].display, function(c) { return c.friendlyName || c.columnName; });
     }
-    view.append(template(data));
+    view.append(rowTemplate(data));
 
     // Deal with checking & unchecking rows for orders
     view.delegate(
@@ -162,12 +172,10 @@ define([
       "click",
       _.compose(enableRowSelector, enableRow, nearestRow)
     ).delegate(
-    "input[data-name_of_column='_SELECTED']:not(:checked)",
-    "click",
-    _.compose(enableRowSelector, disableRow, nearestRow)
+      "input[data-name_of_column='_SELECTED']:not(:checked)",
+      "click",
+      _.compose(enableRowSelector, disableRow, nearestRow)
     );
-
-    view.show();
   }
 
   function dropZoneLoad(context, registerButton, manifestTable, fileContent) {
@@ -209,11 +217,11 @@ define([
                              .object()
                              .value();
                    });
-    return context.getS2Root().then(_.partial(updateSamples, manifest, data));
+    return context.getS2Root().then(_.partial(updateFromManifest, manifest, data));
   }
 
   function buildExtractor(type) {
-    var extractor = Extractors[type || 'span'];
+    var extractor = Extractors[type || 'span'] || Extractors.span;
 
     return function(element) {
       element = $(element);
@@ -236,7 +244,7 @@ define([
 
   function setFileContent(context, fileContent) {
     // This is what we are going to fill out: information on each of the samples (the resource itself but also if there is an
-    // issue associated with it), and any global errors (missing barcodes, search errors).
+    // issue associated with it), and any global errors (missing labels, search errors).
     var manifest = {
       template: undefined,
       errors:   [],
@@ -251,7 +259,7 @@ define([
     }
 
     var templateName       = dataAsArray[2][0]; // always A3 !!
-    manifest.template = ReceptionTemplate[templateName];
+    manifest.template = context.templates[templateName];
     if (_.isUndefined(manifest.template)) {
       manifest.errors.push("Could not find the corresponding template!");
       return resolver();
@@ -267,7 +275,7 @@ define([
     manifest.details =
       _.chain(dataAsArray)
        .drop(manifest.template.manifest.header_line_number+1)
-       .filter(_.first)
+       .filter(manifest.template.emptyRow)
        .map(function(row) { return _.zip(columnHeaders, row); })
        .map(function(pairs) { return _.object(pairs); })
        .map(manifest.template.reader.builder)
@@ -283,31 +291,63 @@ define([
     var deferred =
       context.getS2Root()
              .then(_.partial(pageThroughResources, manifest))
-             .then(_.partial(pushMissingResourceErrors, manifest));
+             .then(_.partial(pushMissingResourceErrors, manifest))
+             .then(_.partial(invalidateManifestIfAllInvalid, manifest))
     return _.regardless(deferred, resolver);
   }
 
-  function updateSamples(manifest, dataFromGUI, root) {
-    // Transform the GUI & manifest data into the same format
+  function updateFromManifest(manifest, dataFromGUI, root) {
+    // Transform the GUI & manifest data into the same format and then merge together the structures, overwriting
+    // the manifest information with that from the GUI.
     var samplesFromGUI = _.map(dataFromGUI, _.compose(_.removeUndefinedKeys, manifest.template.json_template));
     var samples        = _.map(_.pluck(manifest.details, 'row'), manifest.template.json_template);
     var lookup         = _.partial(_.findBy, 'sanger_sample_id', samples);
-
-    // Pair up the samples selected in the GUI with their manifest partners.  Merge the
-    // former into the latter and mark the new sample as published.  Then build an
-    // object that details the updates to perform.
     var updates =
       _.chain(samplesFromGUI)
        .pairwise(lookup)
        .map(function(pair) { return _.deepMerge.apply(undefined, pair); })
+       .value();
+
+    // Now perform the updates on the samples and the labware in parallel, so that we can save some time on this
+    // as these are completely independent.
+    return $.when(updateSamples(root, updates), updateLabware(manifest.model, root, updates));
+  }
+
+  function updateSamples(root, updates) {
+    var sampleUpdates =
+      _.chain(updates)
+       .pluck('sample')
+       .compact()
        .map(markSampleForPublishing)
        .map(function(sample) { return [sample.sanger_sample_id, _.omit(sample,'sanger_sample_id')]; })
        .object()
        .value();
 
+    if (_.isEmpty(sampleUpdates)) return "No updates of sample information required";
+
     return root.bulk_update_samples
-               .create({by: "sanger_sample_id", updates: updates})
+               .create({by: "sanger_sample_id", updates: sampleUpdates})
                .then(_.constant("Samples successfully updated."), _.constant("Could not update the samples in S2."));
+  }
+
+  function updateLabware(model, root, updates) {
+    var resourceUpdates =
+      _.chain(updates)
+       .pluck('resource')
+       .compact()
+       .map(function(u) { return [u.identifier.value, _.omit(u, 'identifier')]; })
+       .object()
+       .value();
+
+    if (_.isEmpty(resourceUpdates)) return "No updates of resource information required";
+
+    return root.bulk_update_labels.create({
+      by: 'identifier',
+      labels: resourceUpdates
+    }).then(
+      _.constant("Labware successfully updated."),
+      _.constant("Could not update the labware in S2.")
+    );
   }
 
   // Search for each of the resources in the manifest so that we can process them in pages.  Each page is
@@ -315,9 +355,9 @@ define([
   // than having 1000 simultaneous requests, we get 10 simultaneous requests that are 100 sequential
   // requests.  This should reduce the load on the browser.
   function pageThroughResources(manifest, root) {
-    var barcodes  = _.chain(manifest.details).indexBy('barcode').keys().value();
-    var promises  = [];
-    return root[manifest.model].searchByBarcode().ean13(barcodes).paged(function(page, hasNext) {
+    var labels   = _.chain(manifest.details).indexBy(function(v) { return v.label.value; }).keys().value();
+    var promises = [];
+    return manifest.template.reader.searcher(root[manifest.model], labels).paged(function(page, hasNext) {
       if (page.entries.length == 0) return;
       promises.push($.chain(_.map(page.entries, promiseHandler), _.regardless));
     }).then(function() {
@@ -335,14 +375,14 @@ define([
   }
 
   function updateManifestDetails(root, manifest, resource) {
-    var details = 
+    var details =
       _.chain(manifest.details)
-       .filter(function(details) { return details.barcode === resource.labels.barcode.value; })
+       .filter(function(details) { return details.label.value === resource.labels[details.label.column].value; })
        .map(function(details) { details.resource = resource; return details; })
        .value();
 
     if (_.isEmpty(details)) {
-      manifest.errors.push("Barcode '" + resource.labels.barcode.value + "' is not part of the manifest!");
+      manifest.errors.push("Label '" + resource.labels.barcode.value + "' is not part of the manifest!");
       return $.Deferred().reject();
     } else {
       // Pair up each of the details with the samples that are in the resource.  Then we can lookup
@@ -375,16 +415,25 @@ define([
       return root.samples
                  .find(uuid)
                  .then(_.partial(checkSample, details))
-                 .then(manifest.template.validation);
+                 .then(_.partial(manifest.template.validation, details));
     }
   }
 
-  // Any barcodes that were not found need to be marked as being missing.
+  // Any labels that were not found need to be marked as being missing.
   function pushMissingResourceErrors(manifest, value) {
     _.each(manifest.details, function(details) {
       if (!_.isUndefined(details.resource)) return;
-      details.errors.push("Cannot find this barcode in the system");
+      details.errors.push("Cannot find these details in the system");
     });
+    return value;
+  }
+
+  // If all of the rows of the manifest are invalid then we can assume the manifest is invalid!
+  function invalidateManifestIfAllInvalid(manifest, value) {
+    if (_.chain(manifest.details).pluck('invalid').all(_.identity).value()) {
+      manifest.errors.push("All of the rows appear invalid so this manifest is assumed to be invalid");
+      manifest.invalid = true;
+    }
     return value;
   }
 
@@ -407,16 +456,11 @@ define([
     if (sample.sanger_sample_id !== details.sample) {
       details.errors.push("Should contain '" + sample.sanger_sample_id + "' not '" + details.sample + "'");
     }
-
-    var gender = details.row['GENDER'];
-    if (_.isUndefined(gender) || !_.isString(gender) || (gender.trim() === '')) {
-      details.errors.push("Gender is invalid");
-    }
     return details;
   }
 
   function markSampleForPublishing(sample) {
-    sample["state"] = "published";
+    sample.state = "published";
     return sample;
   }
 
@@ -426,7 +470,7 @@ define([
       return f.apply(this, arguments).then(function() {
         button.removeClass("btn-warning").prop("disabled", false);
       }, function(value) {
-        if (value.errors.length > 0) { button.hide(); }
+        if (value.invalid || value.errors.length > 0) { button.hide(); }
         button.addClass("btn-warning");
       });
     };
