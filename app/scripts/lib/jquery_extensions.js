@@ -78,6 +78,7 @@ define([
       if (arguments.length == 1) { return arguments[0]; }   // No need to make composite!
       return _.compose(_.partial(_.flip(_.every), _.isTruthy), _.composite.apply(undefined, arguments));
     }
+
   });
 
   // Extend the behaviour of a jQuery selected element.
@@ -120,31 +121,15 @@ define([
       }));
     },
 
-    // Causes the specified element to be swiped into view, and any currently swiped in element
-    // to be swiped out.  Note that this works with a CSS class called "swipe-in" and any effects
-    // should be added to that class itself.
-    swipeIn: function(incoming) {
-      var outgoing = this.find(".swipe-in");
-
-      // When the element goes out of scope, hide it.
-      outgoing.on("transitionend", _.once(_.bind(outgoing.hide, outgoing)))
-              .removeClass("swipe-in");
-
-      // Unfortunately there is an issue that the element, if it's just been shown, will not
-      // transition properly.  Hence, we have to put in a short delay, which can give the 
-      // impression of a pause which we'd like to get rid of.
-      incoming.show();
-      window.setTimeout(
-        _.bind(_.partial(incoming.addClass, "swipe-in"), incoming),
-        10
-      );
-      return this;
-    },
-
-    // Makes the element believe it has been swiped into view!
-    swipedIn: function() {
-      this.addClass("swipe-in");
-      return this;
+    // Returns a function that can be used to fire an event whenever another event fires, because we
+    // repeatedly do this across our codebase.  The arguments to the event trigger come initially
+    // from the call to this function, plus the ones to the event itself, minus the inbound event.
+    eventTrigger: function() {
+      var target = this;
+      var args   = Array.prototype.slice.call(arguments);
+      return $.ignoresEvent(function() {
+        target.trigger.apply(target, args.concat(arguments));
+      });
     }
   });
 

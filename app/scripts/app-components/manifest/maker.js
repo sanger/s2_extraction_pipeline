@@ -21,8 +21,9 @@ define([
     );
 
     return {
+      name: "maker.manifest.s2",
       view: view,
-      events: { "s2.reception.reset_view": _.bind(view.reset, view) }
+      events: { "reset_view.reception.s2": _.bind(view.reset, view) }
     };
   };
 
@@ -31,7 +32,7 @@ define([
       templates: context.templates
     });
 
-    var message = function(type, message) { html.trigger("s2.status." + type, message); };
+    var message = function(type, message) { html.trigger(type + ".status.s2", message); };
     var error   = _.partial(message, "error");
     var success = _.partial(message, "success");
 
@@ -67,7 +68,7 @@ define([
       user:     context.user
     });
     var printAreaHelper = labelPrinter.view.dataHelper("resources");
-    html.on("s2.print.trigger", $.ignoresEvent(_.partial(printLabels, html, labelPrinter.view)));
+    html.on("trigger.print.s2", $.ignoresEvent(_.partial(printLabels, html, labelPrinter.view)));
     html.find("#printer-div").append(labelPrinter.view);
     html.on(labelPrinter.events);
     labelPrinter.view.hide();
@@ -132,7 +133,7 @@ define([
       ));
     });
 
-    html.trigger("s2.print.labels", [printer, labels]);
+    html.trigger("labels.print.s2", [printer, labels]);
   }
   function ean13(labels) {
     return _.isUndefined(labels.ean13) ? undefined : {ean13: labels.ean13};
@@ -163,7 +164,7 @@ define([
   }
 
   function updatePrinters(html, template) {
-    html.trigger("s2.print.filter", [function(printer) {
+    html.trigger("filter.print.s2", [function(printer) {
       return printer.canPrint(template.model);
     }]);
   }
@@ -176,7 +177,8 @@ define([
   function GenerateSamples(context, root, details) {
     var model             = {};
     var template          = details.template;
-    var resourceGenerator = _.partial(template.generator.resources, template.sample_types[details.sample_type]);
+    var typeInformation   = template.sample_types[details.sample_type];
+    var resourceGenerator = _.partial(template.generator.resources, typeInformation);
 
     return template.generator.prepare(
       preRegisterSamples,
@@ -186,14 +188,14 @@ define([
         // We know, up front, how many samples are being created and therefore how many barcodes
         // we're going to need at the end of the process.  Hence, we can perform the bulk sample
         // and bulk barcode creation in parallel.
-        var samples  = registerSamples(details, root);
-        var barcodes = registerBarcodes(details.sample_type, root);
+        var samples  = registerSamples(details, typeInformation, root);
+        var barcodes = registerBarcodes(typeInformation.sample, root);
 
         return $.when(samples, barcodes).then(function(samples, barcodes) {
           // We can create the labware and label it at the same time as producing the
           // manifest XLS file.
 
-          var data   = placeSamples(samples, barcodes, details.sample_type);
+          var data   = placeSamples(samples, barcodes, typeInformation.sample);
           var blob   = _.toCSV(template.generator.manifest(data, template.extras || {}), ",");
 
           var manifest  = sendManifestRequest(context, template, blob);
@@ -209,13 +211,15 @@ define([
   }
 
   // These two functions can run in parallel
-  function preRegisterSamples(number, details, root) {
+  function preRegisterSamples(number, details, type, root) {
+    var defaults = _.deepMerge.apply(_, _.compact([details.defaults, type.defaults]));
+
     return root.bulk_create_samples.create(_.extend({
       state:                 "draft",
       quantity:              number,
-      sample_type:           details.sample_type,
+      sample_type:           type.sample,
       sanger_sample_id_core: details.sanger_sample_id_core
-    }, details.defaults || {})).then(function(action) {
+    }, defaults)).then(function(action) {
       return action.result.samples;
     }, _.constant("Could not pre-register " + number + " samples in S2."));
   }
@@ -298,8 +302,8 @@ define([
 
   // Wraps a function in the process reporting.
   function process(html, f) {
-    var start  = function() { html.trigger("s2.busybox.start_process"); };
-    var finish = function() { html.trigger("s2.busybox.end_process"); };
+    var start  = function() { html.trigger("start_process.busybox.s2"); };
+    var finish = function() { html.trigger("end_process.busybox.s2"); };
 
     return function() {
       start();
