@@ -1366,6 +1366,9 @@
       ],
       "processTitle":  "RNA QC - Gel FX",
       "controllers": [{
+        "controllerName": "robot_controller"
+      },
+      {
         "controllerName":   "connected_controller",
         "behaviours": {
           "start": "start",

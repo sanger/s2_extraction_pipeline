@@ -1,9 +1,8 @@
-define([
-       'app-components/bed-recording/bed-recording',
+define(['app-components/scanning/bed-recording',
        'lib/pubsub', 
        'lib/Util'
-], function (BedRecording, PubSub, Util) {
-  'use strict';
+], function (bedRecording, PubSub, Util) {
+  "use strict";
 
   var BedController = function (owner, controllerFactory) {
     this.owner = owner;
@@ -11,14 +10,15 @@ define([
     return this;
   };
 
-  var ROOT_INSTANCE;
   BedController.prototype.init = function (inputModel, handlerThen) {
     this.model = inputModel;
-    if (_.isUndefined(ROOT_INSTANCE))
-      {
-        ROOT_INSTANCE = inputModel.root;  
+    this.component = bedRecording(_.extend({
+      root: function() {
+        var defer = $.Deferred();
+        defer.resolve(inputModel.root);
+        return defer.promise();
       }
-    this.component = BedRecording(ROOT_INSTANCE);
+    }, _.chain(inputModel).clone().omit("root").value()));
     handlerThen();
     return this;
   };
