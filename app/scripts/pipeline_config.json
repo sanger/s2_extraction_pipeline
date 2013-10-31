@@ -1375,6 +1375,7 @@
           "start": "start",
           "operate": "start",
           "complete": "end",
+          "done": "next",
           "outputs": "print"
         },
         "rowBehaviour":  "bedVerification",
@@ -1412,13 +1413,14 @@
         "behaviours": {
           "start": "start",
           "operate": "start",
-          "complete": "end"
+          "complete": "end",
+          "done": "transfer"
         },
         "rowBehaviour":  "bedRecording",
         "input": {
           "role":  "samples.qc.gel.ebase_rna.batched",
           "model": "tube_racks",
-          "title": "Working Dillution Rack",
+          "title": "Gel",
           "bedTracking": true
         },
         "output": [{
@@ -1426,8 +1428,7 @@
           "aliquotType":  "RNA",
           "purpose":     "stock",
           "model":       "tube_racks",
-          "title":      "Gel",
-          "bedTracking": true
+          "title":      "Gel"
         }]
       }]
     },
