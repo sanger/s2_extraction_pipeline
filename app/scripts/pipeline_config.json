@@ -60,6 +60,7 @@
    "samples.qc.gel.fx_rna",
    "samples.qc.gel.fx_rna.batched",
    "samples.qc.gel.ebase_rna.batched",
+   "samples.qc.gel.imager",
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna.batched",
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna",
    "samples.qc.nx_nanodrop.working_dilution_rna"
@@ -1373,10 +1374,10 @@
         "behaviours": {
           "start": "start",
           "operate": "start",
-          "done": "transfer",
+          "complete": "end",
           "outputs": "print"
         },
-        "rowBehaviour":  "bedRecording",
+        "rowBehaviour":  "bedVerification",
         "input": {
           "role":  "samples.qc.gel.fx_rna.batched",
           "model": "tube_racks",
@@ -1393,6 +1394,70 @@
         }]
       }]
     },
+    {
+      "accepts":       [ "samples.qc.gel.ebase_rna.batched" ],
+      "controllerName": "step_controller",
+      "printerType": 2,
+      "defaultPrinter":"d304bc",
+      "printerType": 1,
+      "buttons": [{ "action": "start", "title": "Begin E-Base" },
+                  { "action": "end",   "title": "Finished E-Base" }
+      ],
+      "processTitle":  "RNA QC - Gel E-Base",
+      "controllers": [{
+        "controllerName": "robot_controller"
+      },
+      {
+        "controllerName":   "connected_controller",
+        "behaviours": {
+          "start": "start",
+          "operate": "start",
+          "complete": "end"
+        },
+        "rowBehaviour":  "bedRecording",
+        "input": {
+          "role":  "samples.qc.gel.ebase_rna.batched",
+          "model": "tube_racks",
+          "title": "Working Dillution Rack",
+          "bedTracking": true
+        },
+        "output": [{
+          "role": "samples.qc.gel.imager",
+          "aliquotType":  "RNA",
+          "purpose":     "stock",
+          "model":       "tube_racks",
+          "title":      "Gel",
+          "bedTracking": true
+        }]
+      }]
+    },
+ 
+    {
+      "accepts":       [ "samples.qc.gel.imager" ],
+      "controllerName": "step_controller",
+      "printerType": 2,
+      "defaultPrinter":"d304bc",
+      "printerType": 1,
+      "buttons": [{ "action": "start", "title": "Begin Imager" },
+                  { "action": "end",   "title": "End Imager" },
+                  { "action": "end",   "title": "Select Image" },
+                  { "action": "end",   "title": "Upload" }
+      ],
+      "processTitle":  "RNA QC - Quality Analysis",
+      "controllers": [
+      {
+        "controllerName": "rack_scan_controller",
+        "defaultPrinter": "d304bc",
+        "printerType": 1,
+        "model": "RackScanModel",
+        "input": {
+          "role":  "samples.qc.gel.imager",
+          "model": "tube_racks",
+          "title": "Working Dillution Rack",
+          "bedTracking": true
+        }
+      }]
+    },    
                               
     {
       "accepts": [ "samples.extraction.lysing_dna_and_rna.filter_paper.awaiting_reception" ],

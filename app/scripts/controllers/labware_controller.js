@@ -118,7 +118,7 @@ define(['controllers/base_controller'
         });
       }
       if (this.bedController) {
-        this.bedController.init(data[this.labwareModel.expected_type], function() {
+        this.bedController.init(function() {
           that.jquerySelection().find("div.linear-process").trigger("activate");
           return that.jquerySelection().find("div.bed");
         });

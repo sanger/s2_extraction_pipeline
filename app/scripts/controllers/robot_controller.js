@@ -27,19 +27,30 @@ define([ "controllers/base_controller", "models/robot_model",
           this.robotInputComponent = robotInput();
           this.getComponentInterface().view.append(this.robotInputComponent.view);
           this.getComponentInterface().view.on(this.robotInputComponent.events);
+          this.getComponentInterface().view.on("scanned.robot.s2", $.ignoresEvent(_.partial(function(controller, robot) {
+            controller.model.then(function(model) {
+              model.batch.update({robot: robot.barcode});
+              PubSub.publish("next_process.step_controller.s2", controller,
+                { batch : model.batch
+                });
+            });
+          }, this)));
+          //this.getComponentInterface().view.on("done.s2", _.partial(this.next, this));
         }
       }, this));
      
       return controller;
     }, getComponentInterface : function() {
       return this.component;
-    }, focus : function() {
+    }, focus: function() {
       var controller = this;
       controller.model.then(function(model) {
         if (model.batch.robot) {
           PubSub.publish("next_process.step_controller.s2", controller,
             { batch : model.batch
             });
+        } else {
+          controller.selector().find('input').focus();
         }
       });
     }, release : function() {
