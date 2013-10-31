@@ -82,6 +82,40 @@ define([
         return subController;
       });
 
+      if (this.owner.config.rowBehaviour === "bedRecording")
+        {
+        this.currentView.renderView();
+        var bedRecordingPromises = this.controllers.reduce(function(memo, p) { 
+          p.renderView();
+          if (_.has(p, "bedController"))
+            {
+              var component = p.bedController.component;
+              $(document.body).on("scanned.robot.s2", _.partial(function(component) {
+                component.view.trigger("activate");
+              }, component));
+              var promise = $.Deferred();
+              component.view.on("scanned.bed-recording.s2", _.bind(promise.resolve, promise));
+              memo.push(promise);
+            }
+          return memo;
+          }, []).value();
+        $.when.apply(this, bedRecordingPromises).then($.ignoresEvent(_.partial(function(controller, data, view) {
+          var promisesData = Array.prototype.slice.call(arguments, 3);
+          controller.isRowComplete = function() {
+            return true;
+          };
+          controller.editableControllers = _.partial(function(robotBarcode, records) {
+            // in bedRecording connected we need to have at least one input and one output per each row
+            return _.chain(records).map(function(record) { 
+              return {labwareModel: { resource: record}};}).reduce(function(memo, node) {
+                return memo.concat([node, _.clone(node)]);
+              }, []);
+          }, promisesData[0], promisesData.slice(1));          
+          controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
+          PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
+        }, controller, {buttons: [{action: "start"}]}))    );
+        }
+      else {
       this.currentView.renderView();
       var arrow = $(".transferArrow", controller.jquerySelection());
       
@@ -135,11 +169,9 @@ define([
           return _.chain(verification.verified).map(function(record) { return {labwareModel: { resource: record.plate}};});
         }, verification);
         controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
-        /* activeController must be connectedController in order to perform the start action */
-        //controller.owner.owner.activeController = controller.owner;
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
       }, controller, {buttons: [{action: "start"}]})));
-      
+      }
     },
 
 
