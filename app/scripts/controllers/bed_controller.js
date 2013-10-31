@@ -3,39 +3,51 @@ define(['app-components/scanning/bed-recording',
        'lib/Util'
 ], function (bedRecording, PubSub, Util) {
   "use strict";
-
+  var ROBOT_SCANNED = "scanned.robot.s2";
   var BedController = function (owner, controllerFactory) {
     this.owner = owner;
     this.controllerFactory = controllerFactory;
     return this;
   };
 
-  BedController.prototype.init = function (inputModel, handlerThen) {
-    this.model = inputModel;
-    this.component = bedRecording(_.extend({
-      root: function() {
-        var defer = $.Deferred();
-        defer.resolve(inputModel.root);
-        return defer.promise();
+  function findRootPromise(controller) {
+    var iterations = 0;
+    while (iterations <20) {
+      if (controller.rootPromise) {
+        return controller.rootPromise;
       }
-    }, _.chain(inputModel).clone().omit("root").value()));
+      controller = controller.owner;
+      iterations++;
+    }
+    throw new Error("Infinite loop while finding root promise");
+  }
+  
+  BedController.prototype.init = function (handlerThen) {
+    this.component = bedRecording({
+      validator: _.partial(function(rootPromise, barcode) {
+        return rootPromise.then(function(root) {
+          return root.findByLabEan13(barcode);
+        });
+      }, findRootPromise(this))
+    });
     handlerThen();
+    this.renderView();
     return this;
   };
 
   BedController.prototype.renderView = function () {
-    this.component.view.on(this.component.events);
-
-    this.component.view.on("done.bed-recording.s2", $.ignoresEvent(_.bind(function(view, bedBarcode, plateLabware) {
-      var msg = {
+    this.component.view.on(_.omit(this.component.events, ROBOT_SCANNED));
+    $(document.body).on(_.pick(this.component.events, ROBOT_SCANNED));
+    this.component.view.on("scanned.bed-recording.s2", $.ignoresEvent(_.bind(function(view, bedBarcode, plateLabware) {
+      /*var msg = {
       modelName: this.owner.labwareModel.expected_type.pluralize(),
       BC:        Util.pad(plateLabware.labels.barcode.value)
-    };
+      };
       this.owner.updateModel(plateLabware);
 
       this.owner.owner.childDone(this.owner, 'barcodeScanned', msg);      
       
-      PubSub.publish("s2.labware.barcode_scanned", this.owner, msg);      
+      PubSub.publish("s2.labware.barcode_scanned", this.owner, msg);*/      
     }, this)));
 
     

@@ -15,9 +15,9 @@ define([ "app-components/labelling/scanning", "lib/jquery_extensions"
       });
     
     scanner.view.on(SCANNED_BARCODE, $.ignoresEvent(function(barcode) {
-      findRobotByBarcode(barcode).then(function(labware) {
-        scanner.view.trigger(ROBOT_SCANNED, labware);
-        scanner.view.trigger(DONE, html);
+      findRobotByBarcode(barcode).then(function(robot) {
+        scanner.view.trigger(ROBOT_SCANNED, robot);
+        scanner.view.trigger(DONE, scanner.view);
       });
     }));
     return scanner;

@@ -1,6 +1,7 @@
 define([
   // The top level controllers (typically these get re-used)
   'controllers/row_controller',
+  'controllers/row_bed_controller',
   'controllers/step_controller',
   'controllers/scan_barcode_controller',
   'controllers/labware_controller',

@@ -5,13 +5,14 @@ define([ "text!app-components/scanning/_bed-recording.html",
     "lib/jquery_extensions"
 ], function(bedRecordingTemplate, linearProcess, bed, plate) {
   "use strict";
-  /* Listens */
+  /* Listens down */
   var PLATE_SCANNED = "scanned.plate.s2";
   var BED_SCANNED = "scanned.bed.s2";
+  /* Listen up */
   var BED_RECORDING_RESET = "reset.bed-recording.s2";
-  /* Triggers */
-  var BED_RECORDING_DONE = "done.bed-recording.s2";
-  var DONE = "done.s2";
+  var ROBOT_SCANNED = "scanned.robot.s2";
+  /* Triggers up */
+  var BED_RECORDING_DONE = "scanned.bed-recording.s2";
   
   return function(context) {
     var html = $(_.template(bedRecordingTemplate)());
@@ -24,6 +25,8 @@ define([ "text!app-components/scanning/_bed-recording.html",
       ]
       });
     html.append(component.view);
+    //html.on(component.events);
+    var robotScannedPromise = $.Deferred();
     var promisesBedRecordingDone = _.chain([ BED_SCANNED, PLATE_SCANNED
     ]).map(_.partial(function(view, eventName) {
       var deferred = $.Deferred();
@@ -31,16 +34,19 @@ define([ "text!app-components/scanning/_bed-recording.html",
         return deferred.resolve.apply(this, arguments);
       }));
       return deferred;
-    }, html)).value();
+    }, html)).value().concat(robotScannedPromise);
     $.when.apply(this, promisesBedRecordingDone).then(
-      function(plateResource, bedBarcode) {
-        html.trigger(BED_RECORDING_DONE, [ html, plateResource, bedBarcode
+      function(bedBarcode, plateResource, robotResource) {
+        html.trigger(BED_RECORDING_DONE, [ html, bedBarcode, plateResource 
         ]);
-        html.trigger(DONE, html);
+        //html.trigger(DONE, html);
       });
     return (
       { view : html, events : _.extend(
-        { BED_RECORDING_RESET : function() {}
+        {  "reset.bed-recording.s2": function() {},
+          "scanned.robot.s2": $.ignoresEvent(_.partial(function(promise, robot) {
+            promise.resolve(robot);
+          }, robotScannedPromise))
         }, component.events)
       });
   };
