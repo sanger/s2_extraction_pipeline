@@ -22,7 +22,9 @@ define([
         component.view.on(component.events);
         component.view.trigger("display.labware.s2", resource);
       },
-
+      getComponentInterface: function() {
+        return component;
+      },
       renderView: function() {
         view().append(component.view);
       }

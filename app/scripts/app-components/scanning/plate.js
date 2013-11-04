@@ -19,6 +19,7 @@ define([ "text!app-components/scanning/_plate.html",
       { label : "Scan plate barcode"
       });
     obj.view.append(html);
+    obj.view.on(labware.events);
     obj.view.on(SCANNED_BARCODE, $.ignoresEvent(function(barcode) {
       context.validator(barcode).then(function(labware) {
         obj.view.trigger(LABWARE_DISPLAY, representer(labware));

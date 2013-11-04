@@ -3,20 +3,18 @@ define([ "app-components/linear-process/linear-process",
 ], function(linearProcess, bedRecording) {
   "use strict";
   return function(context) {
-    /*
-     * TODO: This must be refactored with time. These source lines cannot be
-     * unordered and have lot of pre-assumptions about the tasks at lower
-     * levels that may change in future. BEGIN refactor
-     */
-    var componentsList = [];
-    context.dynamic = _.wrap(context.dynamic, function(func) {
-      var attachFunction = _.wrap(arguments[1], function(previousAttach) {
-        componentsList.push(arguments[1]);
-        return previousAttach.call(this, arguments[1]);
-      });
-      return func.call(this, attachFunction);
+
+    function buildBedRecording(context, list) {
+      return list[list.push(bedRecording(context))];
+    }
+    var componentsList=[];
+    var obj = linearProcess({
+      components: [
+                   { constructor: _.partial(buildBedRecording, context, componentsList)},
+                   { constructor: _.partial(buildBedRecording, context, componentsList)}
+                   ]
     });
-    var obj = linearProcess(context);
+
     var bedVerificationPromises =
     _.map(componentsList, function(component) {
       var promise = $.Deferred();

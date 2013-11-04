@@ -29,7 +29,7 @@ define([ "controllers/base_controller", "models/robot_model",
           this.getComponentInterface().view.on(this.robotInputComponent.events);
           this.getComponentInterface().view.on("scanned.robot.s2", $.ignoresEvent(_.partial(function(controller, robot) {
             controller.model.then(function(model) {
-              model.batch.update({robot: robot.barcode});
+              model.batch.update({process: JSON.stringify(robot)});
               PubSub.publish("next_process.step_controller.s2", controller,
                 { batch : model.batch
                 });

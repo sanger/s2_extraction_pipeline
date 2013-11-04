@@ -85,17 +85,17 @@
       ]
     },
     {
-      "accepts": ["samples.qc.gel.fx_rna"],
+      "accepts": ["samples.rack.stock.rna"],
       "controllerName":"selection_page_controller",
       "processTitle": "RNA QC - Gel FX",
       "buttonTitle": "Print labels",
       "capacity": 4,
       "input":        {
-        "role":"samples.qc.gel.fx_rna",
+        "role":"samples.rack.stock.rna",
         "model":"tube_racks"
       },
       "output": [{
-        "role": "samples.qc.gel.fx_rna.batched"      
+        "role": "samples.qc.gel.fx_rna.batched"
       }]
     },
     {
@@ -1215,7 +1215,7 @@
   },
 
   {
-    "accepts":       [ "samples.rack.stock.rna" ],
+    "accepts":       [ "samples.rack.stock.rna2" ],
     "controllerName": "step_controller",
     "defaultPrinter": "d304bc",
     "printerType": 1,

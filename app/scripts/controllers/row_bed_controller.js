@@ -1,8 +1,9 @@
-define([
+ define([
   "lib/pubsub", 
   "views/row_view" , "app-components/linear-process/linear-process",
-  "app-components/scanning/bed-verification" , "controllers/base_controller"
-], function (PubSub, View, linearProcess, bedVerification, BaseController) {
+  "app-components/labware/display_controller_wrapper",
+  "app-components/scanning/bed-verification" , "app-components/scanning/bed-recording", "controllers/base_controller"
+], function (PubSub, View, linearProcess, labwareControllerWrapper, bedVerification, bedRecording, BaseController) {
   "use strict";
 
   /* Sample model input:
@@ -27,6 +28,17 @@ define([
    * }
    *};
    */
+  function findRootPromise(controller) {
+    var iterations = 0;
+    while (iterations <20) {
+      if (controller.rootPromise) {
+        return controller.rootPromise;
+      }
+      controller = controller.owner;
+      iterations++;
+    }
+    throw new Error("Infinite loop while finding root promise");
+  }
 
   //TODO: check this declaration is ok
   var RowModel = Object.create(Object.prototype);
@@ -46,7 +58,7 @@ define([
       delete this.labwares.enabled;
     },
     setResource:function (value) {
-      this.resource = value
+      this.resource = value;
     }
   });
 
@@ -65,65 +77,61 @@ define([
       return this;
     },
 
-    setupController:function (input_model, jquerySelection) {
+    setupControllerWithBedVerification: function() {
       var controller = this;
-      this.jquerySelection = jquerySelection;
 
-      this.rowModel = Object.create(RowModel).init(this);
-      this.rowModel.setupModel(input_model);
-
-      this.currentView = new View(this, this.jquerySelection());
-
-      // NOTE: sort() call is needed here to ensure labware1,labware2,labware3... ordering
-      this.controllers = _.chain(this.rowModel.labwares).pairs().sort().map(function(nameToDetails) {
-        var name = nameToDetails[0], details = nameToDetails[1];
-        var subController = controller.controllerFactory.create('labware_controller', controller);
-        subController.setupController(details, function() { return controller.jquerySelection().find('.' + name); });
-        return subController;
-      });
-
-      if (this.owner.config.rowBehaviour === "bedRecording")
-        {
-        this.currentView.renderView();
-        var bedRecordingPromises = this.controllers.reduce(function(memo, p) { 
-          p.renderView();
-          if (_.has(p, "bedController"))
-            {
-              var component = p.bedController.component;
-              $(document.body).on("scanned.robot.s2", _.partial(function(component) {
-                component.view.trigger("activate");
-              }, component));
-              var promise = $.Deferred();
-              component.view.on("scanned.bed-recording.s2", _.bind(promise.resolve, promise));
-              memo.push(promise);
-            }
-          return memo;
-          }, []).value();
-        $.when.apply(this, bedRecordingPromises).then($.ignoresEvent(_.partial(function(controller, data, view) {
-          var promisesData = Array.prototype.slice.call(arguments, 3);
-          controller.isRowComplete = function() {
-            return true;
-          };
-          controller.editableControllers = _.partial(function(robotBarcode, records) {
-            // in bedRecording connected we need to have at least one input and one output per each row
-            return _.chain(records).map(function(record) { 
-              return {labwareModel: { resource: record}};}).reduce(function(memo, node) {
-                return memo.concat([node, _.clone(node)]);
-              }, []);
-          }, promisesData[0], promisesData.slice(1));          
-          controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
-          PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
-        }, controller, {buttons: [{action: "start"}]}))    );
-        }
-      else {
-      this.currentView.renderView();
       var arrow = $(".transferArrow", controller.jquerySelection());
       
-      this.linearProcessLabwares = bedVerification({
+      var bedRecordingInfo = this.controllers.map(function(value, pos, list) {
+          if ((pos % 2)===0) 
+            return [value, list[pos+1]];
+      }).compact().reduce(function(memo, p) { 
+        var component;
+        //p[0].renderView();        
+        /*if (_.has(p, "bedController"))
+          {
+            component = p.bedController.component;
+          }
+        else {*/
+        component = bedVerification({
+            validation: function() {
+              var robot = arguments[0];
+              var bedRecords = _.map(Array.prototype.slice.call(arguments, 1), function(list) {
+                list=_.drop(list, 2); 
+                return ({
+                  bed: list[0],
+                  plate: list[1]
+                });
+              });
+              var defer = new $.Deferred();
+              if (_.some(robot.beds, function(bedPair) {
+                return (bedPair[0].barcode === bedRecords[0].bed && bedPair[1].barcode === bedRecords[1].bed); 
+              })) {
+                defer.resolve({
+                  robot: robot.barcode,
+                  verified: bedRecords
+                });
+              }
+              else {
+                defer.reject();
+              }
+              return defer;
+            }
+          });
+        
+        var promise = $.Deferred();
+        component.view.on("scanned.bed-recording.s2", _.bind(promise.resolve, promise));
+        
+        memo.promises.push(promise);
+        memo.components.push(component);
+        return memo;
+      }, {promises: [], components: []}).value();
+      
+      /*this.linearProcessLabwares = bedVerification({
         dynamic: (function(componentsList, labwareList) {
           return function(attachComponentMethod) {
             _.each(componentsList, function(component, pos) {
-              component.view = $(labwareList[pos]).append(component.view).parent();
+              //component.view = $(labwareList[pos]).append(component.view).parent();
               attachComponentMethod(component);
             });
           };
@@ -151,6 +159,17 @@ define([
           }
           return defer;
         }
+      });*/
+ 
+      this.linearProcessLabwares = linearProcess({
+        dynamic: (function(componentsList) {
+          return function(attachComponentMethod) {
+            _.each(componentsList, function(component, pos) {
+              //component.view = $(labwareList[pos]).append(component.view).parent();
+              attachComponentMethod(component);
+            });
+          };
+        })(bedRecordingInfo.components)
       });
       
       controller.jquerySelection().html("");
@@ -162,17 +181,99 @@ define([
         controller.jquerySelection().trigger("activate");
       }, controller));
       $(document.body).on("scanned.bed-verification.s2", $.ignoresEvent(_.partial(function(controller, data, verification) {
-        controller.isRowComplete = function() {
-          return true;
-        };
         controller.editableControllers = _.partial(function(verification) {
-          return _.chain(verification.verified).map(function(record) { return {labwareModel: { resource: record.plate}};});
+          return _.chain(verification.verified).map(function(record) { return {
+            isComplete: _.partial(_.identity, true),
+            labwareModel: { resource: record.plate}};
+            });
         }, verification);
         controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
-      }, controller, {buttons: [{action: "start"}]})));
-      }
+      }, controller, {buttons: [{action: "start"}]})));      
     },
+
+    
+    setupControllerWithBedRecording: function() {
+      var controller = this;
+      var bedRecordingInfo = this.controllers.reduce(function(memo, p) { 
+        var component;
+        p.renderView();        
+        if (_.has(p, "bedController"))
+          {
+            component = p.bedController.component;
+          }
+        else {
+          component = bedRecording({
+            validator: _.partial(function(rootPromise, barcode) {
+              return rootPromise.then(function(root) {
+                return root.findByLabEan13(barcode);
+              });
+            }, findRootPromise(controller))
+          });
+        }
+        var promise = $.Deferred();
+        component.view.on("scanned.bed-recording.s2", _.bind(promise.resolve, promise));
+        
+        memo.promises.push(promise);
+        memo.components.push(component);
+        return memo;
+      }, {promises: [], components: []}).value();
+      
+      var linear = linearProcess({
+        dynamic: (function(componentsList) {
+          return function(attachComponentMethod) {
+            _.each(componentsList, function(component, pos) {
+              //component.view = $(labwareList[pos]).append(component.view).parent();
+              attachComponentMethod(component);
+            });
+          };
+        })(bedRecordingInfo.components)
+      });
+      
+      controller.jquerySelection().append(linear.view);
+      controller.jquerySelection().on(linear.events);
+      $(document.body).on("scanned.robot.s2", _.partial(function(component) {
+        component.view.trigger("activate");
+      }, linear));
+      
+      controller.editableControllers = _.partial(_.identity, _.chain(bedRecordingInfo.components).map(function(p) { return _.extend(p, {isComplete: _.partial(_.identity, true)});}));
+      $.when.apply(this, bedRecordingInfo.promises).then($.ignoresEvent(_.partial(function(controller, data, view) {
+        var promisesData = Array.prototype.slice.call(arguments, 3);
+        controller.editableControllers = _.partial(function(robotBarcode, records) {
+          // in bedRecording connected we need to have at least one input and one output per each row
+          return _.chain(records).map(function(record) { 
+            return {
+              isComplete: _.partial(_.identity, true),
+              labwareModel: { resource: record}};}).reduce(function(memo, node) {
+              return memo.concat([node, _.clone(node)]);
+            }, []);
+        }, promisesData[0], promisesData.slice(1));          
+        controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
+        PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
+      }, controller, {buttons: [{action: "start"}]})));      
+    },
+    setupController:function (input_model, jquerySelection) {
+      var controller = this;
+      this.jquerySelection = jquerySelection;
+
+      this.rowModel = Object.create(RowModel).init(this);
+      this.rowModel.setupModel(input_model);
+
+      this.currentView = new View(this, this.jquerySelection());
+
+      // NOTE: sort() call is needed here to ensure labware1,labware2,labware3... ordering
+      
+      this.controllers = _.chain(this.rowModel.labwares).pairs().sort().map(function(nameToDetails) {
+        var name = nameToDetails[0], details = nameToDetails[1];
+        //var subController = controller.controllerFactory.create('labware_controller', controller);
+        var subController = controller.controllerFactory.create('labware', controller);
+        subController.setupController(details, function() { return controller.jquerySelection().find('.' + name); });
+        return subController;
+      });
+
+      this.currentView.renderView();
+      this[(this.owner.config.rowBehaviour==="bedRecording")?"setupControllerWithBedRecording":"setupControllerWithBedVerification"]();
+   },
 
 
     release:function () {
