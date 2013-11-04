@@ -25,7 +25,9 @@ define([
           component.view.trigger("display.labware.s2", resource[resourceType]);
         }
       },
-
+      getComponentInterface: function() {
+        return component;
+      },
       renderView: function() {
         view().append(component.view);
       }
