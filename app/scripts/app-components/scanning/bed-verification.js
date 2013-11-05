@@ -2,10 +2,14 @@ define([ "app-components/linear-process/linear-process",
     "app-components/scanning/bed-recording"
 ], function(linearProcess, bedRecording) {
   "use strict";
+  
+  var robotScannedPromise = $.Deferred();
+
+  
   return function(context) {
 
     function buildBedRecording(context, list) {
-      return list[list.push(bedRecording(context))];
+      return list[list.push(bedRecording(context))-1];
     }
     var componentsList=[];
     var obj = linearProcess({
@@ -27,17 +31,20 @@ define([ "app-components/linear-process/linear-process",
     /*
      * END refactor
      */
-    var robotScannedPromise = $.Deferred();
-    $.when.apply(this, [ robotScannedPromise
+    $.when.apply(undefined, [ robotScannedPromise
     ].concat(bedVerificationPromises)).then(context.validation).then(
       function() {
         obj.view.trigger("scanned.bed-verification.s2", arguments);
       });
-    obj.view.on(obj.events);
+    //obj.view.on(obj.events);
+    
     _.extend(obj.events,
-      { "scanned.robot.s2" : $.ignoresEvent(_.partial(function(promise, robot) {
+      { "scanned.robot.s2" : $.ignoresEvent(_.partial(function(promise, previous, robot) {
+        if (!!previous) {
+          previous.call(this, robot);
+        }
         promise.resolve(robot);
-      }, robotScannedPromise))
+      }, robotScannedPromise, obj.events["scanned.robot.s2"]))
       });
     return obj;
   };

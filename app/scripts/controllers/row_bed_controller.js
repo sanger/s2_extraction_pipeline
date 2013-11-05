@@ -94,13 +94,18 @@
           }
         else {*/
         component = bedVerification({
+          fetch: _.partial(function(rootPromise, barcode) {
+            return rootPromise.then(function(root) {
+              return root.findByLabEan13(barcode);
+            });
+          }, findRootPromise(controller)),
             validation: function() {
               var robot = arguments[0];
               var bedRecords = _.map(Array.prototype.slice.call(arguments, 1), function(list) {
                 list=_.drop(list, 2); 
                 return ({
-                  bed: list[0],
-                  plate: list[1]
+                  bed: list[0][2],
+                  plate: list[1][2]
                 });
               });
               var defer = new $.Deferred();
@@ -161,7 +166,7 @@
         }
       });*/
  
-      this.linearProcessLabwares = linearProcess({
+      /*this.linearProcessLabwares = linearProcess({
         dynamic: (function(componentsList) {
           return function(attachComponentMethod) {
             _.each(componentsList, function(component, pos) {
@@ -170,7 +175,9 @@
             });
           };
         })(bedRecordingInfo.components)
-      });
+      });*/
+      
+      this.linearProcessLabwares = bedRecordingInfo.components[0];
       
       controller.jquerySelection().html("");
       controller.jquerySelection().append(this.linearProcessLabwares.view);
@@ -204,7 +211,7 @@
           }
         else {
           component = bedRecording({
-            validator: _.partial(function(rootPromise, barcode) {
+            fetch: _.partial(function(rootPromise, barcode) {
               return rootPromise.then(function(root) {
                 return root.findByLabEan13(barcode);
               });
@@ -219,16 +226,16 @@
         return memo;
       }, {promises: [], components: []}).value();
       
-      var linear = linearProcess({
+      /*var linear = linearProcess({
         dynamic: (function(componentsList) {
           return function(attachComponentMethod) {
             _.each(componentsList, function(component, pos) {
-              //component.view = $(labwareList[pos]).append(component.view).parent();
               attachComponentMethod(component);
             });
           };
         })(bedRecordingInfo.components)
-      });
+      });*/
+      var linear = bedRecordingInfo.components[0]; 
       
       controller.jquerySelection().append(linear.view);
       controller.jquerySelection().on(linear.events);
@@ -306,9 +313,9 @@
         .find(function(p) { return !p.isComplete(); })
         .value();
 
-      if (nextInput) {
+      /*if (nextInput) {
         nextInput.barcodeFocus();
-      }
+      }*/
     },
 
     childDone:function (child, action, data) {
@@ -356,7 +363,9 @@
 
     unlockRow: function(){
       this.controllers.each(function(controller) {
-        controller.showEditable();
+        if (!_.isUndefined(controller.showEditable)) { 
+          controller.showEditable();
+        }
       });
       this.focus();
     },

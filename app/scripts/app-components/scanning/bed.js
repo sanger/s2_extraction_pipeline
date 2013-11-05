@@ -15,6 +15,7 @@ define([ "app-components/labelling/scanning", "labware/standard_mappers",
     obj.view.on(SCANNED_BARCODE, $.ignoresEvent(function(barcode) {
       obj.view.trigger(BED_SCANNED, barcode);
       obj.view.trigger(DONE, obj.view, barcode);
+      return true;
     }));
     return obj;
   };

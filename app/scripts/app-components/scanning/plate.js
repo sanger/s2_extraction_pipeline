@@ -21,12 +21,13 @@ define([ "text!app-components/scanning/_plate.html",
     obj.view.append(html);
     obj.view.on(labware.events);
     obj.view.on(SCANNED_BARCODE, $.ignoresEvent(function(barcode) {
-      context.validator(barcode).then(function(labware) {
+      context.fetch(barcode).then(function(labware) {
         obj.view.trigger(LABWARE_DISPLAY, representer(labware));
         return labware;
       }).then(function(labware) {
         obj.view.trigger(PLATE_SCANNED, labware);
         obj.view.trigger(DONE, obj.view);
+        return true;
       }).fail(function() { obj.view.trigger(PLATE_SCANNED_ERROR); });
     }));
     return obj;
