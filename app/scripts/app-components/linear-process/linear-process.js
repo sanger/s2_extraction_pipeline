@@ -14,26 +14,27 @@ define([
     }, externalContext);
 
     var html = componentContainer(context);
-
+    
+    var componentEventHandlers = {};
     // Build and attach any components that are present in the context.  This handles the
     // non-dynamic situations.
     var components = _.map(context.components, _.partial(buildComponent, context));
-    _.each(components, _.partial(attachComponent, html));
+    _.each(components, _.partial(attachComponent, html, componentEventHandlers));
 
     // Dynamic components deal with attaching components by registering a callback.
     context.dynamic(function(component) {
       components.push(component);
-      attachComponent(html, component);
+      attachComponent(html, componentEventHandlers,  component);
       html.trigger("deactivate.s2");
     });
 
     return {
       view: html,
-      events: $.stopsPropagation({
+      events: _.extend(componentEventHandlers, $.stopsPropagation({
         "activate.s2":   $.ignoresEvent(_.partial(initialiseProcessChain, html, components)),
         "deactivate.s2": _.partial(deactivate, html),
         "focus":         function() { components[0].view.focus(); }
-      })
+      }))
     };
   };
 
@@ -87,8 +88,12 @@ define([
 
   function buildTransition(html, pair) {
     // Determine the from and to transitions
-    var from = function() { pair[0].view.trigger("deactivate.s2"); };
-    var to   = function() { html.trigger("done.s2", html); }
+    var from = function() { 
+      pair[0].view.trigger("deactivate.s2"); 
+    };
+    var to   = function() { 
+      html.trigger("done.s2", html); 
+    }
     if (!_.isUndefined(pair[1])) to = function() { pair[1].view.trigger("activate.s2").focus(); };
 
     // By default we want our transition to be the next in the sequence.
@@ -126,7 +131,10 @@ define([
   function createDoneHandler(html, doneHandler) {
     return function(event, doneView) {
       if (html[0] === doneView) return true;
-      doneHandler = doneHandler(event, doneView);
+      if (doneHandler) 
+      {
+        doneHandler = doneHandler(event, doneView);
+      }
       return false;
     };
   }
@@ -139,6 +147,7 @@ define([
     html.trigger("deactivate.s2");
     // Send focus event to selected component;
     component.view.trigger("activate.s2").focus();
+    //console.log(component.view);
   }
 
 
@@ -150,10 +159,25 @@ define([
 
   // Attaches the given component to the specified HTML using the
   // configuration.
-  function attachComponent(html, component) {
-    html.append(component.view).on(_.omit(component.events, ["focus","activate.s2"]));
+  function attachComponent(html, componentEventHandlers, component) {
+    html.append(component.view);
+    //html.append(component.view).on(_.omit(component.events, ["focus","activate.s2"]));
     component.view.on(_.pick(component.events, ["focus","activate.s2"]));
+    // In case two differents components try to export same event, we maintain both
+    // implementations
+    _.extend(componentEventHandlers, component.events);
+    //componentEventHandlers = composeEvents(componentEventHandlers, component.events);
     return component;
+  }
+  
+  function composeEvents(dest, source) {
+    return _.extend(dest, source, _.intersection(_.keys(source), _.keys(dest)).reduce(function(memo, key) {
+      memo[key] = _.wrap(source[key], function(func) {
+        dest[key]();
+        func();
+      });
+      return memo;
+    }, {}));
   }
 });
 

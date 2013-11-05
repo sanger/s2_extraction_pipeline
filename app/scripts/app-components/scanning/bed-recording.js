@@ -13,7 +13,9 @@ define([ "text!app-components/scanning/_bed-recording.html",
   var ROBOT_SCANNED = "scanned.robot.s2";
   /* Triggers up */
   var BED_RECORDING_DONE = "scanned.bed-recording.s2";
-  
+  var DONE = "done.s2";
+  var robotScannedPromise = $.Deferred();
+
   return function(context) {
     var html = $(_.template(bedRecordingTemplate)());
     var component = linearProcess(
@@ -26,27 +28,40 @@ define([ "text!app-components/scanning/_bed-recording.html",
       });
     html.append(component.view);
     //html.on(component.events);
+    /*var promisesBedRecordingDone = [];
     var robotScannedPromise = $.Deferred();
+    promisesBedRecordingDone.push(robotScannedPromise);
+    var bedDefer = $.Deferred();
+    promisesBedRecordingDone.push(bedDefer);
+    component.view.on("scanned.bed.s2", function() {
+      return bedDefer.resolve.apply(this, arguments);
+    });
+    var plateDefer = $.Deferred();
+    promisesBedRecordingDone.push(plateDefer);
+    component.view.on("scanned.plate.s2", function() {
+      return plateDefer.resolve.apply(this, arguments);
+    });*/
     var promisesBedRecordingDone = _.chain([ BED_SCANNED, PLATE_SCANNED
     ]).map(_.partial(function(view, eventName) {
       var deferred = $.Deferred();
-      view.on(eventName, $.ignoresEvent(function() {
-        return deferred.resolve.apply(this, arguments);
-      }));
+      view.on(eventName, _.partial(function(deferred) {
+        deferred.resolve(arguments);
+      }, deferred));
+      
       return deferred;
     }, html)).value().concat(robotScannedPromise);
-    $.when.apply(this, promisesBedRecordingDone).then(
+    $.when.apply(undefined, promisesBedRecordingDone).then(
       function(bedBarcode, plateResource, robotResource) {
-        html.trigger(BED_RECORDING_DONE, [ html, bedBarcode, plateResource 
+        html.trigger("scanned.bed-recording.s2", [ html, bedBarcode, plateResource 
         ]);
-        //html.trigger(DONE, html);
+        html.trigger(DONE, html);
       });
     return (
       { view : html, events : _.extend(
         {  "reset.bed-recording.s2": function() {},
-          "scanned.robot.s2": $.ignoresEvent(_.partial(function(promise, robot) {
+           "scanned.robot.s2": _.partial(function(promise, robot) {
             promise.resolve(robot);
-          }, robotScannedPromise))
+          }, robotScannedPromise)
         }, component.events)
       });
   };

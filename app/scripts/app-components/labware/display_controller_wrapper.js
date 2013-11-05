@@ -14,6 +14,10 @@ define([
     var view      = undefined;
 
     return {
+      labwareModel: {},
+      isComplete: function() {
+        return !!this.complete;
+      },
       setupController: function(resource, selector) {
         // Save the view selector for later
         view = selector;
@@ -30,6 +34,9 @@ define([
       },
       renderView: function() {
         view().append(component.view);
+      },
+      isSpecial: function() {
+        return false;
       }
     };
   }
