@@ -81,8 +81,6 @@
     },
     setupControllerWithBedVerification: function() {
       var controller = this;
-
-      var arrow = $(".transferArrow", controller.jquerySelection());
       
       var bedRecordingInfo = this.controllers.map(function(value, pos, list) {
           if ((pos % 2)===0) 
@@ -128,20 +126,23 @@
       }, {promises: [], components: []}).value();
       
       this.linearProcessLabwares = bedRecordingInfo.components[0];
-      
+
+      // Config view
       controller.jquerySelection().html("");
       controller.jquerySelection().append(this.linearProcessLabwares.view);
       var arrow = "<div class='transferArrow span1 offset1'><span >&rarr;</span></div>";
       $(arrow).insertAfter($(".left")[0]);
-      
       $(".linear-process input").prop("disabled", "true");
       
+      // Enable linear process if robot scanned
       controller.jquerySelection().on(_.omit(this.linearProcessLabwares.events, "scanned.robot.s2"));
       $(document.body).on(_.pick(this.linearProcessLabwares.events, "scanned.robot.s2"));
       $(document.body).on("scanned.robot.s2", _.partial(function(controller) {
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, {buttons: [{action: "print"}]});
         controller.jquerySelection().trigger("activate");
       }, controller));
+      
+      // When bed verification checked for the linear process
       $(document.body).on("scanned.bed-verification.s2", $.ignoresEvent(_.partial(function(controller, data, verification) {
         controller.editableControllers = _.partial(function(verification) {
           return _.chain(verification.verified).map(function(record) { return {
@@ -185,15 +186,17 @@
       
       var linear = bedRecordingInfo.components[0]; 
       
+      // Configs view
       controller.jquerySelection().append(linear.view);
-      //controller.jquerySelection().on(linear.events);
       controller.jquerySelection().on(_.omit(linear.events, "scanned.robot.s2"));
       $(document.body).on(_.pick(linear.events, "scanned.robot.s2"));
       
+      // When robot scanned, enable linear process
       $(document.body).on("scanned.robot.s2", _.partial(function(component) {
         component.view.trigger("activate");
       }, linear));
       
+      // Modify editable controllers for using wrapper labware controller
       controller.editableControllers = _.partial(_.identity, _.chain(bedRecordingInfo.components).map(function(p) { return _.extend(p, {isComplete: _.partial(_.identity, true)});}));
       $.when.call(this, bedRecordingInfo.promises[0]).then($.ignoresEvent(_.partial(function(controller, data, view) {
         var promisesData = _.map(Array.prototype.slice.call(arguments, 3), function(list) { return _.drop(list, 2)[0];});

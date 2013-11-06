@@ -5,13 +5,13 @@ define(["text!app-components/imager/_fileSelector.html"], function(fileSelectorT
     var file       = html.find("input[type=file]");
     var filename   = html.find(".filename");
     
-    html.on("click", function() {
+    $(html[0]).on("click", function() {
       file.val('').click();
       $("input", html).click();
       //html.trigger("done.s2");
     });
     
-    $("input", html).on("change", function(event) {
+    $(html[1]).on("change", function(event) {
       handleFile(html, filename, event.originalEvent.target.files[0]);
     });
     
