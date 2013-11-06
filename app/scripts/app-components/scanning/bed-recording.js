@@ -27,20 +27,7 @@ define([ "text!app-components/scanning/_bed-recording.html",
       ]
       });
     html.append(component.view);
-    //html.on(component.events);
-    /*var promisesBedRecordingDone = [];
-    var robotScannedPromise = $.Deferred();
-    promisesBedRecordingDone.push(robotScannedPromise);
-    var bedDefer = $.Deferred();
-    promisesBedRecordingDone.push(bedDefer);
-    component.view.on("scanned.bed.s2", function() {
-      return bedDefer.resolve.apply(this, arguments);
-    });
-    var plateDefer = $.Deferred();
-    promisesBedRecordingDone.push(plateDefer);
-    component.view.on("scanned.plate.s2", function() {
-      return plateDefer.resolve.apply(this, arguments);
-    });*/
+
     var promisesBedRecordingDone = _.chain([ BED_SCANNED, PLATE_SCANNED
     ]).map(_.partial(function(view, eventName) {
       var deferred = $.Deferred();
@@ -56,6 +43,9 @@ define([ "text!app-components/scanning/_bed-recording.html",
         ]);
         html.trigger(DONE, html);
       });
+    if (context.cssClass) {
+      html.addClass(context.cssClass);
+    }
     return (
       { view : html, events : _.extend(
         {  "reset.bed-recording.s2": function() {},

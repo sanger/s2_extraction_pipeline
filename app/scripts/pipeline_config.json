@@ -1391,6 +1391,10 @@
           "purpose":     "stock",
           "model":       "tube_racks",
           "title":      "Gel",
+          "attributes":  {
+            "number_of_rows": 8,
+            "number_of_columns": 12
+        },
           "bedTracking": true
         }]
       }]
@@ -1435,28 +1439,50 @@
  
     {
       "accepts":       [ "samples.qc.gel.imager" ],
-      "controllerName": "step_controller",
+      "controllerName": "imager",
       "printerType": 2,
       "defaultPrinter":"d304bc",
       "printerType": 1,
       "buttons": [{ "action": "start", "title": "Begin Imager" },
                   { "action": "end",   "title": "End Imager" },
-                  { "action": "end",   "title": "Select Image" },
-                  { "action": "end",   "title": "Upload" }
+                  { "action": "select",   "title": "Select Image" },
+                  { "action": "next",   "title": "Upload" }
       ],
+      "behaviours": {
+        "start": "start",
+        "operate": "start",
+        "complete": "end",
+        "done": "next"
+      }, 
+      "input": {
+        "role":  "samples.qc.gel.imager",
+        "model": "tube_racks",
+        "title": "Working Dillution Rack"
+      },
+      "output": [{
+        "role":  "samples.qc.gel.imager.done",
+        "model": "tube_racks",
+        "aliquotType":  "RNA",
+        "title": "Working Dillution Rack"
+      }],      
       "processTitle":  "RNA QC - Quality Analysis",
       "controllers": [
       {
-        "controllerName": "rack_scan_controller",
+        "controllerName": "imager",
         "defaultPrinter": "d304bc",
         "printerType": 1,
         "model": "RackScanModel",
         "input": {
           "role":  "samples.qc.gel.imager",
           "model": "tube_racks",
-          "title": "Working Dillution Rack",
-          "bedTracking": true
-        }
+          "title": "Working Dillution Rack"
+        },
+        "output": [{
+          "role":  "samples.qc.gel.imager.done",
+          "model": "tube_racks",
+          "aliquotType":  "RNA",
+          "title": "Working Dillution Rack"
+        }]
       }]
     },    
                               
