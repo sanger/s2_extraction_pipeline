@@ -100,7 +100,6 @@ define([ 'config'
     if ( user || (this.rootPromise === undefined) ) {
       // User should be passed in here not hard-coded
       this.rootPromise = S2Root.load({user:user});
-      window.Root = this.rootPromise;
     }
     return this.rootPromise;
   };

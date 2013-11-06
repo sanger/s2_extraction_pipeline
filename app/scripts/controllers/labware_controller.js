@@ -69,9 +69,6 @@ define(['controllers/base_controller'
       this.childDone(this.labwareModel, 'resourceUpdated', {});
       return this;
     },
-    getComponentInterface: function() {
-      return (_.isUndefined(this.bedController))? {view: "", events: {}} : this.bedController.getComponentInterface();
-    },
     setupSubControllers: function () {
       if (!this.resourceController) {
         var type = this.labwareModel.expected_type;
@@ -88,10 +85,6 @@ define(['controllers/base_controller'
         if (!this.barcodeInputController && this.labwareModel.display_barcode && !this.isSpecial()) {
           this.barcodeInputController = this.controllerFactory.create('scan_barcode_controller', this);
         }
-        if (!this.bedController && (this.labwareModel.bedTracking === true))
-        {
-          this.bedController = this.controllerFactory.create('bed_controller', this);
-        } 
         this.setupSubModel();
       }
       return this;
@@ -117,12 +110,6 @@ define(['controllers/base_controller'
           return that.jquerySelection().find("div.barcodeScanner")
         });
       }
-      if (this.bedController) {
-        this.bedController.init(function() {
-          that.jquerySelection().find("div.linear-process").trigger("activate");
-          return that.jquerySelection().find("div.bed");
-        });
-      }
     },
 
     renderView: function () {
@@ -130,22 +117,6 @@ define(['controllers/base_controller'
       this.setupSubModel();
 
       this.view.renderView(this.model);
-
-      if (this.bedController) {
-        this.jquerySelection().append(this.bedController.renderView());
-        /**
-         * TODO
-         * These lines comes from setupSubcontroller. REFACTOR
-         * Begin
-         */
-         this.resourceController = this.controllerFactory.createLabwareSubController(this, this.labwareModel.expected_type);
-         this.labwareModel.displayResource(_.bind(function() {
-           return this.jquerySelection().find("div.resource");
-         }, this));
-         /**
-          * End
-          */
-      }
 
       if (this.resourceController) {
         this.resourceController.renderView();

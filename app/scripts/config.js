@@ -3,6 +3,7 @@ define([
 ], function() {
   'use strict';
 
+  var server = "psd2f";
   var printerTypes = {
     1: {
       name: '96 Well Plate Printer',
@@ -30,8 +31,8 @@ define([
 
   return {
     // Configure the API to S2
-    apiUrl: 'http://psd2g.internal.sanger.ac.uk:8000/',
-    mergeServiceUrl: 'http://psd2g.internal.sanger.ac.uk:8100/manifest-merge-service/',
+    apiUrl: 'http://'+server+'.internal.sanger.ac.uk:8000/',
+    mergeServiceUrl: 'http://'+server+'.internal.sanger.ac.uk:8100/manifest-merge-service/',
 
     // No touching! Release branch value as it's picked up by the deployment script
     release: 'development_branch',
@@ -51,7 +52,7 @@ define([
     },
 
     // Configure the print service
-    printServiceUrl: 'http://psd2g.internal.sanger.ac.uk:8000/printers/legacy/soap',
+    printServiceUrl: 'http://'+server+'.internal.sanger.ac.uk:8000/printers/legacy/soap',
     printers: [
       printer('e367bc', 2),
       printer('d304bc', 1)
