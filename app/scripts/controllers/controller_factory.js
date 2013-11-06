@@ -12,6 +12,7 @@ define([
   'controllers/bed_controller',
   'controllers/robot_controller',
   'controllers/rack_scan_controller',
+  //'controllers/imager_controller',
   'controllers/selection_page_controller',
   'default/default_controller',
   'controllers/volume_control_controller',
@@ -20,7 +21,8 @@ define([
 
   // Component wrapping controllers
   'app-components/labware/display_controller_wrapper',
-  'app-components/lysing/lysing_controller_wrapper'
+  'app-components/lysing/lysing_controller_wrapper',
+  'app-components/imager/imager_controller'
 ], function() {
   'use strict';
 

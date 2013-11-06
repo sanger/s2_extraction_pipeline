@@ -91,6 +91,7 @@ svg text {
 .NanoDropModel.post-file    .legend.presence-absence { display: block; }
 
 // Import component specific styles
+@import "../scripts/app-components/scanning/_styles";
 @import "../scripts/app-components/dropzone/_styles";
 @import "../scripts/app-components/process-choice/_styles";
 @import "../scripts/app-components/re-racking/_styles";

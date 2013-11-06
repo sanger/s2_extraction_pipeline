@@ -14,10 +14,14 @@ define([ "app-components/linear-process/linear-process",
     var componentsList=[];
     var obj = linearProcess({
       components: [
-                   { constructor: _.partial(buildBedRecording, context, componentsList)},
-                   { constructor: _.partial(buildBedRecording, context, componentsList)}
+                   { constructor: _.partial(buildBedRecording, _.extend({cssClass: "left"}, context), componentsList), 
+                     },
+                   { constructor: _.partial(buildBedRecording, _.extend({cssClass: "right"}, context), componentsList),
+                       
+                       }
                    ]
     });
+    //$(".left", component.view).after();;
 
     var bedVerificationPromises =
     _.map(componentsList, function(component) {
