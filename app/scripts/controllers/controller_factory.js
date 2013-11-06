@@ -9,7 +9,6 @@ define([
 
   // Controllers that add extra behaviour, for some reason
   'controllers/kit_controller',
-  'controllers/bed_controller',
   'controllers/robot_controller',
   'controllers/rack_scan_controller',
   //'controllers/imager_controller',
