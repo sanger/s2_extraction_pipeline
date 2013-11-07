@@ -28,15 +28,19 @@ define([ "text!app-components/scanning/_bed-recording.html",
       });
     html.append(component.view);
 
+    $("input", html).prop("disabled", "true");
+    
     var promisesBedRecordingDone = _.chain([ BED_SCANNED, PLATE_SCANNED
     ]).map(_.partial(function(view, eventName) {
       var deferred = $.Deferred();
       view.on(eventName, _.partial(function(deferred) {
         deferred.resolve(arguments);
       }, deferred));
-      
       return deferred;
     }, html)).value().concat(robotScannedPromise);
+    
+   
+    
     $.when.apply(undefined, promisesBedRecordingDone).then(
       function(bedBarcode, plateResource, robotResource) {
         html.trigger("scanned.bed-recording.s2", [ html, bedBarcode, plateResource 

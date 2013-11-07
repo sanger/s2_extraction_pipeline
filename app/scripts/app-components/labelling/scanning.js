@@ -41,6 +41,7 @@ define([
 
     _.extend(html, {
       reset: function() {
+        console.log("received deactivate");
         barcode.val("").prop("disabled", false);
       }
     });
@@ -50,8 +51,12 @@ define([
       view: html,
       events:{
         "reset_view.reception.s2": _.bind(html.reset, html),
+        //"activate.s2": $.haltsEvent($.ignoresEvent(_.partial(_.bind(barcode.prop, barcode), "disabled", false))),
         "activate.s2": $.haltsEvent($.ignoresEvent(_.partial(_.bind(barcode.prop, barcode), "disabled", false))),
-        "deactivate.s2": $.haltsEvent($.ignoresEvent(_.partial(_.bind(barcode.prop, barcode), "disabled", true))),
+        "deactivate.s2": _.wrap(function(func) {
+          console.log("received deactivate");
+          return func();
+        }, $.haltsEvent($.ignoresEvent(_.partial(_.bind(barcode.prop, barcode), "disabled", true)))),
         "focus": $.haltsEvent($.ignoresEvent(_.bind(barcode.focus, barcode)))
       }
     };

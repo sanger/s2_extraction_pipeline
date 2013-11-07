@@ -13,7 +13,8 @@ define([ "app-components/labelling/scanning", "lib/jquery_extensions"
     var scanner = labwareScanner(
       { label : "Scan robot barcode"
       });
-    
+    $("input", scanner.view).prop("disabled", "true");
+    $(scanner.view).addClass("robot");
     scanner.view.on(SCANNED_BARCODE, $.ignoresEvent(function(barcode) {
       findRobotByBarcode(barcode).then(function(robot) {
         scanner.view.trigger(ROBOT_SCANNED, robot);
