@@ -1455,6 +1455,7 @@
         "done": "next"
       }, 
       "input": {
+        "not_batched":true,
         "role":  "samples.qc.gel.imager",
         "model": "tube_racks",
         "title": "Working Dillution Rack"
@@ -1465,26 +1466,45 @@
         "aliquotType":  "RNA",
         "title": "Working Dillution Rack"
       }],      
-      "processTitle":  "RNA QC - Quality Analysis",
-      "controllers": [
+      "processTitle":  "RNA QC - GEL IMAGER WAS DONE"
+    },
+    {
+      "accepts":       [ "samples.qc.gel.imager.done" ],
+      "controllerName": "step_controller",
+      "printerType": 2,
+      "defaultPrinter":"d304bc",
+      "printerType": 1,
+      "buttons": [{ "action": "start", "title": "Begin E-Base" },
+                  { "action": "end",   "title": "Finished E-Base" }
+      ],
+      "processTitle":  "RNA QC - Gel E-Base",
+      "controllers": [{
+        "controllerName": "robot_controller"
+      },
       {
-        "controllerName": "imager",
-        "defaultPrinter": "d304bc",
-        "printerType": 1,
-        "model": "RackScanModel",
-        "input": {
-          "role":  "samples.qc.gel.imager",
-          "model": "tube_racks",
-          "title": "Working Dillution Rack"
+        "controllerName":   "connected_controller",
+        "behaviours": {
+          "start": "start",
+          "operate": "start",
+          "complete": "end",
+          "done": "transfer"
         },
-        "output": [{
+        "rowBehaviour":  "bedRecording",
+        "input": {
           "role":  "samples.qc.gel.imager.done",
           "model": "tube_racks",
+          "title": "Gel",
+          "bedTracking": true
+        },
+        "output": [{
+          "role": "samples.qc.gel.imager",
           "aliquotType":  "RNA",
-          "title": "Working Dillution Rack"
+          "purpose":     "stock",
+          "model":       "tube_racks",
+          "title":      "Gel"
         }]
       }]
-    },    
+    },
                               
     {
       "accepts": [ "samples.extraction.lysing_dna_and_rna.filter_paper.awaiting_reception" ],

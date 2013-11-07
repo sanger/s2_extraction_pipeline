@@ -289,6 +289,7 @@
     },
 
     childDone:function (child, action, data) {
+      console.log("action="+action);
       var data = $.extend(data, { origin: child });
 
       if (action == "tube rendered") {

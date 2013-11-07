@@ -1,7 +1,8 @@
-define([ "app-components/linear-process/linear-process",
+define([ "app-components/linear-process/linear-process", "app-components/labware/display", "labware/standard_mappers",
     "app-components/imager/button", "app-components/imager/fileSelector",
-], function(linearProcess, button, fileSelector) {
+], function(linearProcess, labwareDisplay, representer, button, fileSelector) {
   return function(context) {
+    var LABWARE_DISPLAY="display.labware.s2";
     var linear = linearProcess({ 
       components : [
         { constructor : _.partial(button, { text : "Begin Imager", action: "begin.imager.s2" })
@@ -14,6 +15,13 @@ define([ "app-components/linear-process/linear-process",
         }
       ]
       });
+    
+    var labware = labwareDisplay({});
+    linear.view.append(labware.view);
+    linear.view.on(labware.events);
+    
+    linear.view.trigger(LABWARE_DISPLAY, representer(context.labware));
+        
     return linear;
   };
 });
