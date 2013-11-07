@@ -1,4 +1,5 @@
-define(["text!app-components/imager/_fileSelector.html"], function(fileSelectorTemplate) {
+define(["text!app-components/imager/_fileSelector.html"
+        ], function(fileSelectorTemplate) {
   
   return function(context) {
     var html = $(_.template(fileSelectorTemplate)(context));

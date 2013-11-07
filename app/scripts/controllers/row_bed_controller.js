@@ -115,7 +115,7 @@
               }
               return defer;
             }
-          });
+        });
         
         var promise = $.Deferred();
         component.view.on("scanned.bed-recording.s2", _.bind(promise.resolve, promise));
@@ -127,18 +127,27 @@
       
       this.linearProcessLabwares = bedRecordingInfo.components[0];
 
+      PubSub.subscribe("printing_finished.step_controller.s2", _.bind(function() {
+        // Enable the robot
+        $(".robot input").prop("disabled", false).focus();
+        /*setTimeout(_.bind(function() {
+          this.owner.owner.childDone(this, "enableBtn", {buttons:[{action:"print"}]});
+        }, this), 0);*/
+      }, this));
+      
       // Config view
       controller.jquerySelection().html("");
       controller.jquerySelection().append(this.linearProcessLabwares.view);
       var arrow = "<div class='transferArrow span1 offset1'><span >&rarr;</span></div>";
       $(arrow).insertAfter($(".left")[0]);
-      $(".linear-process input").prop("disabled", "true");
-      
+      console.log("disabling inputs");
       // Enable linear process if robot scanned
+      controller.owner.owner.activeController = this.owner;
       controller.jquerySelection().on(_.omit(this.linearProcessLabwares.events, "scanned.robot.s2"));
       $(document.body).on(_.pick(this.linearProcessLabwares.events, "scanned.robot.s2"));
+      PubSub.publish("enable_buttons.step_controller.s2", controller.owner, {buttons: [{action: "print"}]});
       $(document.body).on("scanned.robot.s2", _.partial(function(controller) {
-        PubSub.publish("enable_buttons.step_controller.s2", controller.owner, {buttons: [{action: "print"}]});
+        
         controller.jquerySelection().trigger("activate");
       }, controller));
       
@@ -190,6 +199,7 @@
       controller.jquerySelection().append(linear.view);
       controller.jquerySelection().on(_.omit(linear.events, "scanned.robot.s2"));
       $(document.body).on(_.pick(linear.events, "scanned.robot.s2"));
+      $(".robot input").prop("disabled", false).focus();
       
       // When robot scanned, enable linear process
       $(document.body).on("scanned.robot.s2", _.partial(function(component) {

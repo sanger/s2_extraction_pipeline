@@ -53,7 +53,7 @@ define([ "app-components/imager/imager", "models/selection_page_model"
               .then(function (model) {
                 controller.owner.childDone(controller, "done", {batch:null,labware:null});
               });
-          }
+          };
         } else {
           return function (e) {
             if (!controller.batchCreated) {
@@ -61,7 +61,7 @@ define([ "app-components/imager/imager", "models/selection_page_model"
               controller.jquerySelection().find("button.btn").attr("disabled", "disabled");
               controller.model
                 .then(function (model) {
-                  return model.makeBatch()
+                  return model.makeBatch();
                 })
                 .fail(function (error) {
                   PubSub.publish("error.status.s2", controller, error);
@@ -70,7 +70,7 @@ define([ "app-components/imager/imager", "models/selection_page_model"
                   controller.owner.childDone(controller, "done", {batch: model.batch});
                 });
             }
-          }
+          };
         }
       }
 

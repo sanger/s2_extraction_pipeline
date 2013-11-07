@@ -22,6 +22,8 @@ define([ "app-components/linear-process/linear-process",
                    ]
     });
     //$(".left", component.view).after();;
+    console.log("disabling input");
+    $("input", obj.view).prop("disabled", "true");
 
     var bedVerificationPromises =
     _.map(componentsList, function(component) {

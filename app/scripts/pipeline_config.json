@@ -1360,7 +1360,7 @@
       "printerType": 2,
       "defaultPrinter":"d304bc",
       "printerType": 1,
-      "buttons": [{ "action": "print", "title": "Print labels" },
+      "buttons": [{ "action": "print", "title": "Print labels", "alwaysEnabled": true },
                   { "action": "start", "title": "Begin FX" },
                   { "action": "end",   "title": "Finished NX" },
                   { "action": "next",  "title": "Done" }
