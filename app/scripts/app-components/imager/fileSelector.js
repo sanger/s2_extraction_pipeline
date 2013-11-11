@@ -36,12 +36,12 @@ define(["text!app-components/imager/_fileSelector.html"
     
     html.attr("disabled", true);
     
-    return ({
+    return {
       view: html,
       events: {
         "activate.s2": $.haltsEvent($.ignoresEvent(_.partial(_.bind(html.attr, html), "disabled", false))),
         "deactivate.s2": $.haltsEvent($.ignoresEvent(_.partial(_.bind(html.attr, html), "disabled", true)))
       }
-    });
+    };
   };
 });
