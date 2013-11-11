@@ -57,10 +57,10 @@
    "samples.extraction.racking.fluidx_tube_rna",
 
    "samples.rack.stock.rna",
+   "samples.qc.gel.imager",
    "samples.qc.gel.fx_rna",
    "samples.qc.gel.fx_rna.batched",
    "samples.qc.gel.ebase_rna.batched",
-   "samples.qc.gel.imager",
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna.batched",
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna",
    "samples.qc.nx_nanodrop.working_dilution_rna"
@@ -1418,7 +1418,7 @@
           "start": "start",
           "operate": "start",
           "complete": "end",
-          "done": "transfer"
+          "done": "end"
         },
         "rowBehaviour":  "bedRecording",
         "input": {
@@ -1432,7 +1432,8 @@
           "aliquotType":  "RNA",
           "purpose":     "stock",
           "model":       "tube_racks",
-          "title":      "Gel"
+          "title":      "Gel",
+          "not_batched":true
         }]
       }]
     },
@@ -1442,6 +1443,7 @@
       "controllerName": "imager",
       "printerType": 2,
       "defaultPrinter":"d304bc",
+      "processTitle":  "RNA QC - Gel Imager",
       "printerType": 1,
       "buttons": [{ "action": "start", "title": "Begin Imager" },
                   { "action": "end",   "title": "End Imager" },
@@ -1455,7 +1457,6 @@
         "done": "next"
       }, 
       "input": {
-        "not_batched":true,
         "role":  "samples.qc.gel.imager",
         "model": "tube_racks",
         "title": "Working Dillution Rack"
@@ -1465,8 +1466,7 @@
         "model": "tube_racks",
         "aliquotType":  "RNA",
         "title": "Working Dillution Rack"
-      }],      
-      "processTitle":  "RNA QC - GEL IMAGER WAS DONE"
+      }]
     },
     {
       "accepts":       [ "samples.qc.gel.imager.done" ],
@@ -1477,7 +1477,7 @@
       "buttons": [{ "action": "start", "title": "Begin E-Base" },
                   { "action": "end",   "title": "Finished E-Base" }
       ],
-      "processTitle":  "RNA QC - Gel E-Base",
+      "processTitle":  "RNA QC - Imager Done",
       "controllers": [{
         "controllerName": "robot_controller"
       },

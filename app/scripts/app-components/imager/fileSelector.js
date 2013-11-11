@@ -27,7 +27,7 @@ define(["text!app-components/imager/_fileSelector.html"
           if (context.action) {
             html.trigger(context.action, _.extend(data, { content: event.target.result}));
           }
-          //html.trigger("uploaded.request.imager.s2", _.extend(data, { content: event.target.result}));
+          html.trigger("uploaded.request.imager.s2", _.extend(data, { content: event.target.result}));
           html.trigger("done.s2");
         }
       };
