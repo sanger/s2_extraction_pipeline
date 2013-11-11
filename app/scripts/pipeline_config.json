@@ -1470,39 +1470,32 @@
     },
     {
       "accepts":       [ "samples.qc.gel.imager.done" ],
-      "controllerName": "step_controller",
+      "controllerName": "imager",
       "printerType": 2,
       "defaultPrinter":"d304bc",
+      "processTitle":  "RNA QC - Gel Imager",
       "printerType": 1,
-      "buttons": [{ "action": "start", "title": "Begin E-Base" },
-                  { "action": "end",   "title": "Finished E-Base" }
+      "buttons": [{ "action": "start", "title": "Begin Imager" },
+                  { "action": "end",   "title": "End Imager" },
+                  { "action": "select",   "title": "Select Image" },
+                  { "action": "next",   "title": "Upload" }
       ],
-      "processTitle":  "RNA QC - Imager Done",
-      "controllers": [{
-        "controllerName": "robot_controller"
+      "behaviours": {
+        "start": "start",
+        "operate": "start",
+        "complete": "end",
+        "done": "next"
+      }, 
+      "input": {
+        "role":  "samples.qc.gel.imager.done",
+        "model": "tube_racks",
+        "title": "Working Dillution Rack"
       },
-      {
-        "controllerName":   "connected_controller",
-        "behaviours": {
-          "start": "start",
-          "operate": "start",
-          "complete": "end",
-          "done": "transfer"
-        },
-        "rowBehaviour":  "bedRecording",
-        "input": {
-          "role":  "samples.qc.gel.imager.done",
-          "model": "tube_racks",
-          "title": "Gel",
-          "bedTracking": true
-        },
-        "output": [{
-          "role": "samples.qc.gel.imager",
-          "aliquotType":  "RNA",
-          "purpose":     "stock",
-          "model":       "tube_racks",
-          "title":      "Gel"
-        }]
+      "output": [{
+        "role":  "samples.qc.gel.imager.done",
+        "model": "tube_racks",
+        "aliquotType":  "RNA",
+        "title": "Working Dillution Rack"
       }]
     },
                               
