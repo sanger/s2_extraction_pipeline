@@ -212,7 +212,10 @@
       $(document.body).on("scanned.robot.s2", _.partial(startMyRow, controller));
       
       // Modify editable controllers for using wrapper labware controller
-      controller.editableControllers = _.partial(_.identity, _.chain(bedRecordingInfo.components).map(function(p) { return _.extend(p, {isComplete: _.partial(_.identity, true)});}));
+      controller.editableControllers = _.partial(_.identity, 
+        _.chain(bedRecordingInfo.components).map(function(p) { 
+          return _.extend(p, {isComplete: _.partial(_.identity, true)});
+          }));
       $.when.call(this, bedRecordingInfo.promises[0]).then($.ignoresEvent(_.partial(function(controller, data, view) {
         var promisesData = _.map(Array.prototype.slice.call(arguments, 3), function(list) { return _.drop(list, 2)[0];});
         controller.editableControllers = _.partial(function(robotBarcode, records) {
@@ -225,9 +228,13 @@
             }, []);
         }, promisesData[0], [promisesData[1]]);
         controller.owner.childDone(controller, "completed", data);
-        //controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
-      }, controller, {buttons: [{action: "start"}]})));      
+      }, controller, {buttons: [{action: "start"}]}))); 
+      
+      
+      $('.endButton').on('click', function() {
+        window.location.reload(true);
+      });
     },
     setupController:function (input_model, jquerySelection) {
       var controller = this;
@@ -263,7 +270,7 @@
       this.controllers.reduce(function(memo, controller) {
         if (!memo) {
           controller.labwareEnabled(false);
-          return false
+          return false;
         }
 
         if (controller.isSpecial()) {
