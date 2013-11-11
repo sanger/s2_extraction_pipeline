@@ -38,9 +38,18 @@ define([ "app-components/imager/imager", /*"models/connected"*/ "models/selectio
           return model.setup(inputModel);
         });
         
-        view.on("upload.request.imager.s2", _.partial(function(model, method) {
-          model.then(method);
-        }, this.model, _.partial(this.changeRoleForResource, uuid)));
+        var file = {};
+        view.on("uploaded.request.imager.s2", _.partial(function(file, event, data) {
+          file.content = data.content;
+        }, file));
+        view.on("upload.request.imager.s2", _.partial(function(file, model, method, uuid) {
+          var promiseQuery = $.ajax("http://psd2g.internal.sanger.ac.uk:8000/lims-laboratory/"+uuid, {
+            method: "PUT",
+            contentType: "application/json; charset=UTF-8",
+            data: "{ \"out_of_bounds\" : { \"image\"  : \""+file.content+"\"}}"
+          });
+          $.when(promiseQuery, model).then(_.partial(method, uuid));
+        }, file, this.model, this.changeRoleForResource, uuid));
         
         return this;
       }, release : function() {},
@@ -108,6 +117,7 @@ define([ "app-components/imager/imager", /*"models/connected"*/ "models/selectio
             return Operations.stateManagement().start(addingRoles);
           })
           .then(function(){
+            Operations.stateManagement().start(changingRoles);
             return Operations.stateManagement().complete(changingRoles);
           })
           .then(function(){
