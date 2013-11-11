@@ -14,6 +14,10 @@ define([
     var view      = undefined;
 
     return {
+      labwareModel: {},
+      isComplete: function() {
+        return !!this.complete;
+      },
       setupController: function(resource, selector) {
         // Save the view selector for later
         view = selector;
@@ -24,10 +28,25 @@ define([
         if (!_.isUndefined(resource)) {
           component.view.trigger("display.labware.s2", resource[resourceType]);
         }
+        this._component = component;
       },
-
+      hideEditable: function() {
+        if (this._html) {
+          $("input", this._html).prop("disabled", true);
+        }
+      },
+      showEditable: function() {
+        
+      },
+      getComponentInterface: function() {
+        this._html = component.view;
+        return component;
+      },
       renderView: function() {
-        view().append(component.view);
+        this._html = view().append(component.view);
+      },
+      isSpecial: function() {
+        return false;
       }
     };
   }
