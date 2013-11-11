@@ -1,5 +1,5 @@
-define([ "app-components/imager/imager", /*"models/connected"*/ "models/selection_page_model" , "lib/pubsub", 'mapper/operations'//"models/selection_page_model"
-], function(imager, Model, PubSub, Operations) {
+define([ "config", "app-components/imager/imager", /*"models/connected"*/ "models/selection_page_model" , "lib/pubsub", 'mapper/operations'//"models/selection_page_model"
+], function(appConfig, imager, Model, PubSub, Operations) {
   "use strict";
   return (
     { register : function(callback) {
@@ -26,11 +26,43 @@ define([ "app-components/imager/imager", /*"models/connected"*/ "models/selectio
         
         this.model = Object.create(Model).init(this, config);
         view.on("begin.imager.s2", _.partial(function(model) {
-          model.started = true;
+          model.started = true;          
           PubSub.publish("message.status.s2", this, {message: 'Transfer started'});
+          config.initialLabware.order().then(function(orderObj) {
+            return {
+              input: {
+                order: orderObj,
+                resource: config.initialLabware,
+                role: config.input.role
+              },
+              output: {
+                order: orderObj,
+                resource: config.initialLabware,
+                role: config.output[0].role                 
+              }
+            };
+         }).then(function(data) {
+           Operations.stateManagement().start({ updates: [data]});
+         });          
         }, this.model));
         view.on("completed.imager.s2", _.partial(function(model) {
           PubSub.publish("message.status.s2", this, {message: 'Transfer completed'});
+          config.initialLabware.order().then(function(orderObj) {
+            return {
+              input: {
+                order: orderObj,
+                resource: config.initialLabware,
+                role: config.input.role
+              },
+              output: {
+                order: orderObj,
+                resource: config.initialLabware,
+                role: config.output[0].role                 
+              }
+            };
+         }).then(function(data) {
+           Operations.stateManagement().complete({ updates: [data]});
+         });          
         }, this.model));        
 
         this.model
@@ -38,19 +70,24 @@ define([ "app-components/imager/imager", /*"models/connected"*/ "models/selectio
           return model.setup(inputModel);
         });
         
-        var file = {};
+        var dataParams = {
+          out_of_bounds: {
+            image: ""
+          }
+        };
         view.on("uploaded.request.imager.s2", _.partial(function(file, event, data) {
-          file.content = data.content;
-        }, file));
-        view.on("upload.request.imager.s2", _.partial(function(file, model, method, uuid) {
-          var promiseQuery = $.ajax("http://psd2g.internal.sanger.ac.uk:8000/lims-laboratory/"+uuid, {
+          file.image = window.btoa(data.content);
+          file.dataType = "BASE64";
+        }, dataParams.out_of_bounds));
+        view.on("upload.request.imager.s2", _.partial(function(dataParams, model, method, uuid) {
+          // This must be moved to S2 Mapper
+          var url = appConfig.apiUrl + "lims-laboratory";
+          var promiseQuery = $.ajax(url+"/"+uuid, {
             method: "PUT",
             contentType: "application/json; charset=UTF-8",
-            data: "{ \"out_of_bounds\" : { \"image\"  : \""+file.content+"\"}}"
+            data: JSON.stringify(dataParams)
           });
-          $.when(promiseQuery, model).then(_.partial(method, uuid));
-        }, file, this.model, this.changeRoleForResource, uuid));
-        
+        }, dataParams, this.model, this.changeRoleForResource, uuid));        
         return this;
       }, release : function() {},
       initialController: function(){
