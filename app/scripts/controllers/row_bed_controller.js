@@ -135,7 +135,7 @@
       
       this.linearProcessLabwares = bedRecordingInfo.components[0];
 
-      PubSub.subscribe("printing_finished.step_controller.s2", _.bind(function() {
+      PubSub.subscribe("printing_finished.barcodePrintSuccess", _.bind(function() {
         // Enable the robot
         $(".robot input").prop("disabled", false).focus();
       }, this));
@@ -233,7 +233,9 @@
       
       
       $('.endButton').on('click', function() {
-        window.location.reload(true);
+        setTimeout(function() {
+          window.location.reload(true);
+        }, 1000);
       });
     },
     setupController:function (input_model, jquerySelection) {
@@ -296,7 +298,6 @@
     },
 
     childDone:function (child, action, data) {
-      console.log("action="+action);
       var data = $.extend(data, { origin: child });
 
       if (action == "tube rendered") {

@@ -1389,12 +1389,12 @@
           "role": "samples.qc.gel.ebase_rna.batched",
           "aliquotType":  "RNA",
           "purpose":     "stock",
-          "model":       "tube_racks",
+          "model":       "gels",
           "title":      "Gel",
           "attributes":  {
             "number_of_rows": 8,
             "number_of_columns": 12
-        },
+          },
           "bedTracking": true
         }]
       }]
@@ -1459,13 +1459,13 @@
       "input": {
         "role":  "samples.qc.gel.imager",
         "model": "tube_racks",
-        "title": "Working Dillution Rack"
+        "title": "Gel"
       },
       "output": [{
         "role":  "samples.qc.gel.imager.done",
         "model": "tube_racks",
         "aliquotType":  "RNA",
-        "title": "Working Dillution Rack"
+        "title": "Gel"
       }]
     },
     {
@@ -1489,13 +1489,13 @@
       "input": {
         "role":  "samples.qc.gel.imager.done",
         "model": "tube_racks",
-        "title": "Working Dillution Rack"
+        "title": "Gel"
       },
       "output": [{
         "role":  "samples.qc.gel.imager.done",
         "model": "tube_racks",
         "aliquotType":  "RNA",
-        "title": "Working Dillution Rack"
+        "title": "Gel"
       }]
     },
                               
