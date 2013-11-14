@@ -40,6 +40,14 @@
     throw new Error("Infinite loop while finding root promise");
   }
 
+  function startMyRow(controller) {
+    if (controller.jquerySelection().hasClass("row0"))
+      {
+        $(controller.jquerySelection()[0]).trigger("activate");
+      }
+  }
+  
+
   //TODO: check this declaration is ok
   var RowModel = Object.create(Object.prototype);
 
@@ -130,38 +138,37 @@
       PubSub.subscribe("printing_finished.step_controller.s2", _.bind(function() {
         // Enable the robot
         $(".robot input").prop("disabled", false).focus();
-        /*setTimeout(_.bind(function() {
-          this.owner.owner.childDone(this, "enableBtn", {buttons:[{action:"print"}]});
-        }, this), 0);*/
       }, this));
       
       // Config view
       controller.jquerySelection().html("");
       controller.jquerySelection().append(this.linearProcessLabwares.view);
       var arrow = "<div class='transferArrow span1 offset1'><span >&rarr;</span></div>";
-      $(arrow).insertAfter($(".left")[0]);
+      $(arrow).insertAfter($(".left", controller.jquerySelection())[0]);
       console.log("disabling inputs");
       // Enable linear process if robot scanned
       controller.owner.owner.activeController = this.owner;
       controller.jquerySelection().on(_.omit(this.linearProcessLabwares.events, "scanned.robot.s2"));
       $(document.body).on(_.pick(this.linearProcessLabwares.events, "scanned.robot.s2"));
       PubSub.publish("enable_buttons.step_controller.s2", controller.owner, {buttons: [{action: "print"}]});
-      $(document.body).on("scanned.robot.s2", _.partial(function(controller) {
-        
-        controller.jquerySelection().trigger("activate");
-      }, controller));
-      
-      // When bed verification checked for the linear process
-      $(document.body).on("scanned.bed-verification.s2", $.ignoresEvent(_.partial(function(controller, data, verification) {
+            
+      function enableProcessButtons(controller, data, verification) {
         controller.editableControllers = _.partial(function(verification) {
           return _.chain(verification.verified).map(function(record) { return {
             isComplete: _.partial(_.identity, true),
             labwareModel: { resource: record.plate}};
             });
         }, verification);
-        controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
+        controller.owner.childDone(controller, "completed", data);
+        //controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
-      }, controller, {buttons: [{action: "start"}]})));      
+      }
+      
+      
+      $(document.body).on("scanned.robot.s2", _.partial(startMyRow, controller));
+      
+      // When bed verification checked for the linear process
+      controller.jquerySelection().on("scanned.bed-verification.s2", $.ignoresEvent(_.partial(enableProcessButtons, controller, {buttons: [{action: "start"}]})));      
     },
 
     
@@ -202,9 +209,7 @@
       $(".robot input").prop("disabled", false).focus();
       
       // When robot scanned, enable linear process
-      $(document.body).on("scanned.robot.s2", _.partial(function(component) {
-        component.view.trigger("activate");
-      }, linear));
+      $(document.body).on("scanned.robot.s2", _.partial(startMyRow, controller));
       
       // Modify editable controllers for using wrapper labware controller
       controller.editableControllers = _.partial(_.identity, _.chain(bedRecordingInfo.components).map(function(p) { return _.extend(p, {isComplete: _.partial(_.identity, true)});}));
@@ -218,8 +223,9 @@
               labwareModel: { resource: record}};}).reduce(function(memo, node) {
               return memo.concat([node, _.clone(node)]);
             }, []);
-        }, promisesData[0], [promisesData[1]]);          
-        controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
+        }, promisesData[0], [promisesData[1]]);
+        controller.owner.childDone(controller, "completed", data);
+        //controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
       }, controller, {buttons: [{action: "start"}]})));      
     },
@@ -320,17 +326,23 @@
     },
 
     lockRow: function() {
-      this.controllers.each(function(controller) {
+      $("input", this.jquerySelection()).prop("disabled", true);
+      /*this.controllers.each(function(controller) {
         controller.hideEditable();
-      });
+      });*/
     },
 
     unlockRow: function(){
-      this.controllers.each(function(controller) {
+      if (!this.jquerySelection().hasClass("row0"))
+        {
+          $($(".linear-process", this.jquerySelection())[0]).trigger("activate");
+        }
+      //$("input", this.jquerySelection()).prop("disabled", false);
+      /*this.controllers.each(function(controller) {
         if (!_.isUndefined(controller.showEditable)) { 
           controller.showEditable();
         }
-      });
+      });*/
       this.focus();
     },
 
