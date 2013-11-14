@@ -1,5 +1,5 @@
-define([ "app-components/labelling/scanning", "lib/jquery_extensions"
-], function(labwareScanner) {
+define([ "app-components/labelling/scanning", "lib/pubsub", "lib/jquery_extensions"
+], function(labwareScanner, PubSub) {
   "use strict";
   /* Listens */
   var SCANNED_BARCODE = "scanned.barcode.s2";
@@ -19,7 +19,10 @@ define([ "app-components/labelling/scanning", "lib/jquery_extensions"
       findRobotByBarcode(barcode).then(function(robot) {
         scanner.view.trigger(ROBOT_SCANNED, robot);
         scanner.view.trigger(DONE, scanner.view);
+        PubSub.publish("message.status.s2", this, {message: 'Loaded robot.'});
         return true;
+      }, function() {
+        PubSub.publish("error.status.s2", this, {message: 'Incorrect robot barcode.'});
       });
     }));
     return scanner;

@@ -1,6 +1,6 @@
 define([ "app-components/linear-process/linear-process",
-    "app-components/scanning/bed-recording"
-], function(linearProcess, bedRecording) {
+    "app-components/scanning/bed-recording", "lib/pubsub"
+], function(linearProcess, bedRecording, PubSub) {
   "use strict";
   
   var robotScannedPromise = $.Deferred();
@@ -41,6 +41,9 @@ define([ "app-components/linear-process/linear-process",
     ].concat(bedVerificationPromises)).then(context.validation).then(
       function() {
         obj.view.trigger("scanned.bed-verification.s2", arguments);
+        PubSub.publish("message.status.s2", this, {message: 'Bed verification correct.'});
+      }, function() {
+        PubSub.publish("error.status.s2", this, {message: 'Incorrect bed verification.'});        
       });
     //obj.view.on(obj.events);
     
