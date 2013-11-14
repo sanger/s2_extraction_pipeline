@@ -20,7 +20,7 @@ define(["text!app-components/imager/_fileSelector.html"
       var data = _.clone(file);
       var reader       = new FileReader();
       reader.onload    = function(event) {
-        filename.text(file.name);
+        $(".filename").text(file.name);
       };
       reader.onloadend = function(event) {
         if (event.target.readyState === FileReader.DONE) {

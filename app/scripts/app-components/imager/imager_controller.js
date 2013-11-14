@@ -42,7 +42,8 @@ define([ "config", "app-components/imager/imager", /*"models/connected"*/ "model
         this.owner = owner;
         var component = imager({labware: config.initialLabware});
         var view = selector();
-        view.html(component.view);
+        view.html($('<div class="filename"><span class="filename"></span></div>'));
+        view.append(component.view);
         view.on(component.events);
         this.component = component;
         
@@ -119,11 +120,16 @@ define([ "config", "app-components/imager/imager", /*"models/connected"*/ "model
         view.on("upload.request.imager.s2", _.partial(function(dataParams, model, uuid) {
           // This must be moved to S2 Mapper
           var url = appConfig.apiUrl + "lims-laboratory";
-          var promiseQuery = $.ajax(url+"/"+uuid, {
-            method: "PUT",
-            contentType: "application/json; charset=UTF-8",
-            data: JSON.stringify(dataParams)
-          });
+          var promiseQuery = $.ajax(url+"/"+uuid,
+            {
+              headers :
+              {
+                Accept : "application/json; charset=utf-8",
+                "Content-Type" : "application/json; charset=utf-8"
+              }, 
+              data : JSON.stringify(dataParams),
+              method : "PUT"
+            });
         }, dataParams, this.model, uuid));
         
         return this;
