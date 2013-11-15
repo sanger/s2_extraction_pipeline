@@ -84,6 +84,7 @@ define([
     },
 
     childDone:function (child, action, data) {
+      console.log("action="+action);
       if (child === this.currentView) {
         this.currentViewDone(child, action, data);
       } else if (child === this.model) {
@@ -94,6 +95,7 @@ define([
     },
 
     unknownDone:function (child, action, data) {
+      console.log("action="+action);
       var originator = data.origin, controller = this;
       if (action === 'inputBarcodeScanned') {
         controller.model.inputs.getByBarcode(originator, data.modelName, data.BC).done(function(resource) {
@@ -119,6 +121,7 @@ define([
     },
 
     rowDone: function(child, action, data) {
+      console.log("action="+action);
       if (action === 'completed') {
         this.model.operate('row', [child]);
         if (this.checkPageComplete()) {
@@ -128,7 +131,7 @@ define([
     },
 
     modelDone: function(child, action, data) {
-
+      console.log("action="+action);
       if (action === 'outputsReady') {
         this.model.ready = true;
         this.setupSubControllers(true);
@@ -138,6 +141,7 @@ define([
 
         PubSub.publish("message.status.s2", this, {message: 'Barcode labels printed'});
         PubSub.publish("printing_finished.step_controller.s2", this);
+        PubSub.publish("printing_finished.barcodePrintSuccess", this);
         this.owner.childDone(this, "disableBtn", {buttons:[{action:"print"}]});
 
       } else if (action === "barcodePrintFailure") {
@@ -212,7 +216,6 @@ define([
 
     next:  function(child, action, data){
       var controller = this;
-
       this.model.behaviours.done[action](
         function(){ controller.owner.childDone(controller, 'done') },
         function(){ eventHandler.call(controller, child, action, data); }
