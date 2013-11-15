@@ -88,7 +88,7 @@
       "accepts": ["samples.rack.stock.rna"],
       "controllerName":"selection_page_controller",
       "processTitle": "RNA QC - Gel FX",
-      "buttonTitle": "Print labels",
+      "buttonTitle": "Continue",
       "capacity": 4,
       "input":        {
         "role":"samples.rack.stock.rna",
