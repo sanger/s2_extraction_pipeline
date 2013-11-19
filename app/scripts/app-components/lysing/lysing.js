@@ -6,6 +6,7 @@ define([
 
   "app-components/linear-process/linear-process",
   "app-components/labware/scanning",
+  "app-components/labware/display",
   "app-components/labelling/printing",
   "labware/standard_mappers",
   "mapper/operations",
@@ -13,14 +14,15 @@ define([
   // Added to the global namespace
   "lib/underscore_extensions",
   "lib/jquery_extensions"
-], function(view, inputView, outputView, printView, LinearProcess, LabwareScanner, LabelPrinting, StandardRepresenter, Operations) {
+], function(view, inputView, outputView, printView, LinearProcess, LabwareScanner, LabwareDisplay, LabelPrinting, StandardRepresenter, Operations) {
   "use strict";
 
+  
   var template        = _.compose($, _.template(view));
   var printTemplate   = _.compose($, _.template(printView));
 
-  var InputComponent  = new LabwareComponent(_.compose($, _.template(inputView)));
-  var OutputComponent = new LabwareComponent(_.compose($, _.template(outputView)));
+  var InputComponent  = _.partial(LabwareDisplay, _.compose($, _.template(inputView)));
+  var OutputComponent = _.partial(LabwareScanner, _.compose($, _.template(outputView)));
 
   return function(context) {
     var $html   = template(context);
@@ -82,7 +84,6 @@ define([
     }));
 
     $html.on("done.s2", $.stopsPropagation($.ignoresEvent(function(view) {
-      debugger
       if (view === $html[0]) { return true; }      // Us, firing.
 
       // Wait for the promises to resolve and ensure they are in a specific order!
@@ -98,10 +99,13 @@ define([
       });
     })));
 
-
+    // Config input display labware
+    $html.on(_.pick(process.events, "display.labware.s2"));    
+    $html.trigger("display.labware.s2", [context.input.labware]);
+    
     return {
       view: $html,
-      events: process.events
+      events: _.omit(process.events, "display.labware.s2")
     };
   };
 
@@ -147,7 +151,7 @@ define([
   function LabwareComponent(template) {
     return function(context) {
       var html      = template(context);
-      var component = new LabwareScanner(context);
+      var component = new LabwareDisplay(context);
       html.append(component.view);
       return {
         view: html,
