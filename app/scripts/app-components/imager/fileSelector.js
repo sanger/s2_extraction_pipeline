@@ -1,5 +1,6 @@
 define(["text!app-components/imager/_fileSelector.html"
         ], function(fileSelectorTemplate) {
+  "use strict";
   
   return function(context) {
     var html = $(_.template(fileSelectorTemplate)(context));
@@ -9,7 +10,6 @@ define(["text!app-components/imager/_fileSelector.html"
     $(html[0]).on("click", function() {
       file.val('').click();
       $("input", html).click();
-      //html.trigger("done.s2");
     });
     
     $(html[1]).on("change", function(event) {

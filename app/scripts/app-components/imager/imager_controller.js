@@ -1,6 +1,7 @@
 define([ "config", "app-components/imager/imager", /*"models/connected"*/ "models/selection_page_model" , "lib/pubsub", 'mapper/operations'//"models/selection_page_model"
 ], function(appConfig, imager, Model, PubSub, Operations) {
   "use strict";
+  
   return (
     { register : function(callback) {
       return callback("imager", imagerController);
