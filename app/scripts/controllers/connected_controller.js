@@ -84,7 +84,6 @@ define([
     },
 
     childDone:function (child, action, data) {
-      console.log("action="+action);
       if (child === this.currentView) {
         this.currentViewDone(child, action, data);
       } else if (child === this.model) {
@@ -95,7 +94,6 @@ define([
     },
 
     unknownDone:function (child, action, data) {
-      console.log("action="+action);
       var originator = data.origin, controller = this;
       if (action === 'inputBarcodeScanned') {
         controller.model.inputs.getByBarcode(originator, data.modelName, data.BC).done(function(resource) {
@@ -121,7 +119,6 @@ define([
     },
 
     rowDone: function(child, action, data) {
-      console.log("action="+action);
       if (action === 'completed') {
         this.model.operate('row', [child]);
         if (this.checkPageComplete()) {
@@ -131,7 +128,6 @@ define([
     },
 
     modelDone: function(child, action, data) {
-      console.log("action="+action);
       if (action === 'outputsReady') {
         this.model.ready = true;
         this.setupSubControllers(true);

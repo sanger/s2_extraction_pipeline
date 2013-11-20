@@ -82,7 +82,7 @@ define([
         .value()
       );
     }
-  }
+  };
 
   function printerOption(printer) {
     return "<option value=\"" + printer.name + "\">" + printer.friendlyName + "</option>";

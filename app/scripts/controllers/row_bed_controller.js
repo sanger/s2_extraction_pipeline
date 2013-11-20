@@ -145,7 +145,7 @@
       controller.jquerySelection().append(this.linearProcessLabwares.view);
       var arrow = "<div class='transferArrow span1 offset1'><span >&rarr;</span></div>";
       $(arrow).insertAfter($(".left", controller.jquerySelection())[0]);
-      console.log("disabling inputs");
+
       // Enable linear process if robot scanned
       controller.owner.owner.activeController = this.owner;
       controller.jquerySelection().on(_.omit(this.linearProcessLabwares.events, "scanned.robot.s2"));
@@ -160,7 +160,6 @@
             });
         }, verification);
         controller.owner.childDone(controller, "completed", data);
-        //controller.owner.owner.childDone(controller.owner.owner.view, "done", data);
         PubSub.publish("enable_buttons.step_controller.s2", controller.owner, data);
       }
       
@@ -291,15 +290,13 @@
       var nextInput = this.editableControllers()
         .find(function(p) { return !p.isComplete(); })
         .value();
-
-      /*if (nextInput) {
-        nextInput.barcodeFocus();
-      }*/
     },
 
     childDone:function (child, action, data) {
-      var data = $.extend(data, { origin: child });
-
+      var eventPrefix;
+      
+      data = $.extend(data, { origin: child });
+      
       if (action == "tube rendered") {
         this.owner.childDone(this, "tubeFinished", data);
       } else if (action === 'resourceUpdated') {
@@ -309,7 +306,7 @@
       } else if (action == "labwareRendered") {
         this.setLabwareVisibility();
       } else if (action === 'removeLabware') {
-        var eventPrefix = child.labwareModel.input ? 'input' : 'output';
+        eventPrefix = child.labwareModel.input ? 'input' : 'output';
         child.release();
         delete child.resource;
         delete child.resourceController;
@@ -318,7 +315,7 @@
         child.renderView();
         this.owner.childDone(this, eventPrefix+'Removed', data);
       } else if (action === "barcodeScanned") {
-        var eventPrefix = child.labwareModel.input ? 'input' : 'output';
+        eventPrefix = child.labwareModel.input ? 'input' : 'output';
         this.owner.childDone(this, eventPrefix+'BarcodeScanned', data);
         this.focus();
       }
@@ -336,9 +333,6 @@
 
     lockRow: function() {
       $("input", this.jquerySelection()).prop("disabled", true);
-      /*this.controllers.each(function(controller) {
-        controller.hideEditable();
-      });*/
     },
 
     unlockRow: function(){
@@ -346,12 +340,6 @@
         {
           $($(".linear-process", this.jquerySelection())[0]).trigger("activate");
         }
-      //$("input", this.jquerySelection()).prop("disabled", false);
-      /*this.controllers.each(function(controller) {
-        if (!_.isUndefined(controller.showEditable)) { 
-          controller.showEditable();
-        }
-      });*/
       this.focus();
     },
 

@@ -93,7 +93,7 @@ define([
     };
     var to   = function() { 
       html.trigger("done.s2", html); 
-    }
+    };
     if (!_.isUndefined(pair[1])) to = function() { pair[1].view.trigger("activate.s2").focus(); };
 
     // By default we want our transition to be the next in the sequence.
@@ -147,7 +147,6 @@ define([
     html.trigger("deactivate.s2");
     // Send focus event to selected component;
     component.view.trigger("activate.s2").focus();
-    //console.log(component.view);
   }
 
 
@@ -161,12 +160,10 @@ define([
   // configuration.
   function attachComponent(html, componentEventHandlers, component) {
     html.append(component.view);
-    //html.append(component.view).on(_.omit(component.events, ["focus","activate.s2"]));
     component.view.on(_.pick(component.events, ["focus","activate.s2"]));
     // In case two differents components try to export same event, we maintain both
     // implementations
     _.extend(componentEventHandlers, component.events);
-    //componentEventHandlers = composeEvents(componentEventHandlers, component.events);
     return component;
   }
   

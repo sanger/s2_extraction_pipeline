@@ -2,9 +2,8 @@ define([ "app-components/linear-process/linear-process",
     "app-components/scanning/bed-recording", "lib/pubsub"
 ], function(linearProcess, bedRecording, PubSub) {
   "use strict";
-  
-  var robotScannedPromise = $.Deferred();
 
+  var robotScannedPromise = $.Deferred();
   
   return function(context) {
 
@@ -13,16 +12,10 @@ define([ "app-components/linear-process/linear-process",
     }
     var componentsList=[];
     var obj = linearProcess({
-      components: [
-                   { constructor: _.partial(buildBedRecording, _.extend({cssClass: "left"}, context), componentsList), 
-                     },
-                   { constructor: _.partial(buildBedRecording, _.extend({cssClass: "right"}, context), componentsList),
-                       
-                       }
-                   ]
+      components: [{ constructor: _.partial(buildBedRecording, _.extend({cssClass: "left"}, context), componentsList) },
+                   { constructor: _.partial(buildBedRecording, _.extend({cssClass: "right"}, context), componentsList) } ]
     });
-    //$(".left", component.view).after();;
-    console.log("disabling input");
+
     $("input", obj.view).prop("disabled", "true");
 
     var bedVerificationPromises =
@@ -34,9 +27,7 @@ define([ "app-components/linear-process/linear-process",
       });
       return promise;
     });
-    /*
-     * END refactor
-     */
+
     $.when.apply(undefined, [ robotScannedPromise
     ].concat(bedVerificationPromises)).then(context.validation).then(
       function() {
@@ -45,7 +36,6 @@ define([ "app-components/linear-process/linear-process",
       }, function() {
         PubSub.publish("error.status.s2", this, {message: 'Incorrect bed verification.'});        
       });
-    //obj.view.on(obj.events);
     
     _.extend(obj.events,
       { "scanned.robot.s2" : $.ignoresEvent(_.partial(function(promise, previous, robot) {

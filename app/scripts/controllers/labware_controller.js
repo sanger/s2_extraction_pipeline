@@ -69,8 +69,9 @@ define(["controllers/base_controller",
       return this;
     },
     setupSubControllers: function () {
+      var type;
       if (!this.resourceController) {
-        var type = this.labwareModel.expected_type;
+        type = this.labwareModel.expected_type;
       }
       if (this.labwareModel.resource) {
         type = this.labwareModel.resource.resourceType;
