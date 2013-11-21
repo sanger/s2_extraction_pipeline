@@ -11,7 +11,6 @@ define([
   'controllers/kit_controller',
   'controllers/robot_controller',
   'controllers/rack_scan_controller',
-  //'controllers/imager_controller',
   'controllers/selection_page_controller',
   'default/default_controller',
   'controllers/volume_control_controller',
