@@ -85,13 +85,13 @@
       ]
     },
     {
-      "accepts": ["samples.rack.stock.rna"],
+      "accepts": ["samples.qc.gel.fx_rna"],
       "controllerName":"selection_page_controller",
       "processTitle": "RNA QC - Gel FX",
       "buttonTitle": "Continue",
       "capacity": 4,
       "input":        {
-        "role":"samples.rack.stock.rna",
+        "role":"samples.qc.gel.fx_rna",
         "model":"tube_racks"
       },
       "output": [{
@@ -1215,7 +1215,7 @@
   },
 
   {
-    "accepts":       [ "samples.rack.stock.rna2" ],
+    "accepts":       [ "samples.rack.stock.rna" ],
     "controllerName": "step_controller",
     "defaultPrinter": "d304bc",
     "printerType": 1,
