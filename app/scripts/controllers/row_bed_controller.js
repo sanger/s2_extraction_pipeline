@@ -207,6 +207,8 @@
       $(document.body).on(_.pick(linear.events, "scanned.robot.s2"));
       $(".robot input").prop("disabled", false).focus();
       
+      $(document.body).addClass("bed-recording");
+      
       // When robot scanned, enable linear process
       $(document.body).on("scanned.robot.s2", _.partial(startMyRow, controller));
       

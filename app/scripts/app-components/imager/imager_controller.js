@@ -130,6 +130,8 @@ define([ "config", "app-components/imager/imager", /*"models/connected"*/ "model
               }, 
               data : JSON.stringify(dataParams),
               method : "PUT"
+            }).then(function() {
+              PubSub.publish("message.status.s2", this, {message: 'Uploaded file'});
             });
         }, dataParams, this.model, uuid));
         
