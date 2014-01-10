@@ -24,7 +24,7 @@ define([
         // Create the component and then tell it the resource to display
         component = new LabwareDisplay({ model: resourceType });
         component.view.on(component.events);
-        component.view.trigger("display.labware.s2", resource);
+        component.view.trigger("display.labware.s2", resource[resourceType]);
         this._component = component;
       },
       hideEditable: function() {
