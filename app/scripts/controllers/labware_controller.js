@@ -116,7 +116,7 @@ define(["controllers/base_controller",
       this.view.clear();
       this.setupSubModel();
 
-      this.view.renderView(this.model);
+      this.view.renderView(this.labwareModel);
 
       if (this.resourceController) {
         this.resourceController.renderView();
