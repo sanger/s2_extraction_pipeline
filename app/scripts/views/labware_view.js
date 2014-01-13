@@ -41,7 +41,7 @@ define(['text!html_partials/_labware.html'], function (labwarePartialHtml) {
     var parent = this.jquerySelector();
 
     // We have to append to the document or events won't register
-    parent.empty().append(labwarePartialHtml);
+    parent.empty().append(_.template(labwarePartialHtml, model));
 
     var removeButton = parent.find('.removeButton');
     var view = this;

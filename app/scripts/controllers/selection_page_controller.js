@@ -118,11 +118,18 @@ define([ 'controllers/base_controller'
                 return controller.jquerySelection().find(".labware-selection > li:eq(" + childIndex + ")");
               };
             };
+            var expectedType = thisModel.config.input.model.singularize();
             var controllerData = [];
             _.each(inputs, function (tube) {
+              var displayedNumSamples = false;
+              if (thisModel.config.display_num_samples) {
+                displayedNumSamples = _.keys(tube.rawJson[expectedType] && tube.rawJson[expectedType].tubes).length;
+              }
               controllerData.push({
                 resource:tube,
-                expected_type:thisModel.config.input.model.singularize(),
+                expected_type:expectedType,
+                labwareTemplate: thisModel.config.labwareTemplate,
+                display_num_samples: displayedNumSamples,
                 display_remove:true,
                 display_barcode:false,
                 title: thisModel.config.input.title
@@ -131,7 +138,7 @@ define([ 'controllers/base_controller'
             var nbNoneLabwareRows = thisModel.capacity - (numTubes);
             if (nbNoneLabwareRows > 0 ) {
               controllerData.push({
-                expected_type:thisModel.config.input.model.singularize(),
+                expected_type:expectedType,
                 display_remove:false,
                 display_barcode:true,
                 display_labware:false,
