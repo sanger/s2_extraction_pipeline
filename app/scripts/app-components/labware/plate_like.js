@@ -55,6 +55,7 @@ define([
 
       view.empty().append(document.importNode(picker(labware), true));
 
+      debugger;
       // Display the information related to the individual locations
       _.each(labware.locations, function(value, location) {
         view.find("svg ." + location).attr("class", cssForType(value));
