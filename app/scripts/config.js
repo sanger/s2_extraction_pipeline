@@ -30,8 +30,8 @@ define([
 
   return {
     // Configure the API to S2
-    apiUrl: "SERVER_NAME",
-    mergeServiceUrl: "SERVER_NAME/manifest-merge-service/",
+    apiUrl: "http://psd2g.internal.sanger.ac.uk:8000/",
+    mergeServiceUrl: "http://psd2g.internal.sanger.ac.uk:8100/manifest-merge-service/",
 
     // No touching! Release branch value as it's picked up by the deployment script
     release: "development_branch",
@@ -51,11 +51,9 @@ define([
     },
 
     // Configure the print service
-    printServiceUrl: "SERVER_NAME/printers/legacy/soap",
+    printServiceUrl: "http://psd2g.internal.sanger.ac.uk:8000/printers/legacy/soap",
 
     printers: [
-      printer("g216bc", 2),
-      printer("g214bc", 1),
       printer("e367bc", 2),
       printer("d304bc", 1)
     ],
@@ -75,6 +73,7 @@ define([
 
     // Add an exclusive pages as an attribute list on each user.
     UserData: {
+<<<<<<< HEAD
       "0000000000001": {
         email: "Test_User_1",
         pages: [ "lab-management" ]
@@ -83,6 +82,12 @@ define([
       "0000000000002": {
         email: "Test_User_2",
       }
+=======
+      "0000000000001": "TEST_USER_1"
+    },
+    Management: {
+      "0000000000001": "TEST_USER_1"
+>>>>>>> 0d02792... Added sample shipping feature
     }
 
   };
