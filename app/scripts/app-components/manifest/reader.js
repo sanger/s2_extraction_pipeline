@@ -248,10 +248,19 @@ define([
       return memo;
     }
 
-    var samplesFromGUI = _.chain(dataFromGUI)
+    // Classifies by Sanger Sample Id
+    var manifestDetailsObject = _.reduce(manifest.details, function(memo, detail) {
+      memo[detail.sample] = detail;
+      return memo;
+    }, {});
+    
+    // Composes with input from .csv file
+    var samplesFromUI = _.chain(dataFromGUI)
                           .groupBy("SANGER SAMPLE ID")
                           .reduce(groupExtractionProcesses, {})
-                          .map(_.compose(_.removeUndefinedKeys, manifest.template.json_template))
+                          .map(function(obj, key) {
+                            return _.removeUndefinedKeys(manifest.template.json_template(manifestDetailsObject[key].row));
+                          })
                           .reduce(indexBySangerId, {})
                           .value();
 
@@ -262,7 +271,7 @@ define([
 
       update.sample = _.extend(
         _.removeUndefinedKeys(o.sample),
-        samplesFromGUI[o.sample.sanger_sample_id]
+        samplesFromUI[o.sample.sanger_sample_id]
       );
 
       return update;
