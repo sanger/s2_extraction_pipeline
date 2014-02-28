@@ -130,7 +130,7 @@ module.exports = function (grunt) {
                 src: ['test/index.html'],
                 options: {
                     run: false,
-                    spawn: false
+                    timeout: 15000
                 }
             }
         },
