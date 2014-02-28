@@ -46,7 +46,5 @@ requirejs([
   
   _.templateSettings.variable = "templateData";
   
-  // if (navigator.userAgent.indexOf('PhantomJS') < 0) {
-    mocha.run();
-  // }
+  mocha.run();
 });
