@@ -130,7 +130,8 @@ module.exports = function (grunt) {
                 options: {
                     run: false,
                     urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html'],
-                    reporter: 'Nyan'
+                    // reporter: 'Nyan',
+                    log: true
                 }
             }
         },
@@ -358,9 +359,9 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('test', [
-        'clean:server',
-        'connect:test',
-        'mocha'
+      'clean:server',
+      'connect:test',
+      'mocha'
     ]);
 
     grunt.registerTask('testAll', [
