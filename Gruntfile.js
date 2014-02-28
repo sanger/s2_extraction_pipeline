@@ -128,8 +128,8 @@ module.exports = function (grunt) {
         mocha: {
             all: {
                 src: ['test/index.html'],
+                run: false,
                 options: {
-                    run: true,
                     timeout: 15000
                 }
             }
