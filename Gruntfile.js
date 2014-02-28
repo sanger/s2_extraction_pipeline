@@ -127,9 +127,10 @@ module.exports = function (grunt) {
         },
         mocha: {
             all: {
+                src: ['test/index.html'],
                 options: {
                     run: false,
-                    urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html']
+                    spawn: false
                 }
             }
         },
@@ -358,7 +359,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [
       'clean:server',
-      // 'connect:test',
+      'connect:test',
       'mocha'
     ]);
 
