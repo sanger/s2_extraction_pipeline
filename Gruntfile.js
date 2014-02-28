@@ -130,7 +130,8 @@ module.exports = function (grunt) {
                 options: {
                     run: false,
                     timeout: 15000,
-                    urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html']
+                    urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html'],
+                    logErrors: true
                 }
             }
         },
