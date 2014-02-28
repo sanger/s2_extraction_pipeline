@@ -27,7 +27,8 @@ requirejs.config({
     underscore:           "../components/underscore/underscore-min",
     underscore_string:    "../components/underscore.string/lib/underscore.string",
     bootstrap:            "../components/sass-bootstrap/js",
-    components:           "../components"
+    components:           "../components",
+    event_emitter:        "../components/eventEmitter/EventEmitter"
   }
 });
 
