@@ -129,9 +129,7 @@ module.exports = function (grunt) {
             all: {
                 options: {
                     run: false,
-                    urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html'],
-                    // reporter: 'Nyan',
-                    log: true
+                    urls: ['http://localhost:<%= connect.test.options.port %>/test/index.html']
                 }
             }
         },
@@ -360,7 +358,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [
       'clean:server',
-      'connect:test',
+      // 'connect:test',
       'mocha'
     ]);
 
