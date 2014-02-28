@@ -33,14 +33,14 @@ requirejs.config({
 });
 
 requirejs([
-  "spec/maker_spec",
-  "spec/vial_spec",
-  "spec/underscore_extensions_spec",
-  "spec/file_handling_spec",
+  /*"spec/maker_spec",
+  "spec/vial_spec",*/
+  "spec/underscore_extensions_spec"
+  /*"spec/file_handling_spec",
   "spec/fake_user_spec",
   "spec/selection_page_model_spec",
   "spec/selection_page_spec",
-  "spec/util_spec"
+  "spec/util_spec"*/
 ], function () {
   "use strict";
   
