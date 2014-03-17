@@ -1,9 +1,4 @@
-define([
-      'controllers/base_controller',
-       'models/connected',
-       'text!html_partials/_connected.html',
-       'lib/pubsub'
-], function(BaseController, Model, Template, PubSub) {
+define([], function() {
   'use strict';
   
   return $.extend({}, {
