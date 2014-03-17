@@ -2,7 +2,6 @@ define([], function() {
   'use strict';
   
   return $.extend({}, {
-    checkPageComplete: _.partial(_.identity, true),
     start: _.partial(actionOperation, "start"),
 
     end:   _.partial(actionOperation, "end"),
@@ -30,23 +29,20 @@ define([], function() {
   });
   
   function actionOperation(action) {
-    if (this.checkPageComplete()) {
-      this.model.operate(action, this.getRowsConnectedForOperations(), "A1").then(_.bind(function() {
-        if (action==="start") {
-          this.emit("processBegin");
-          this.emit("transferStarted");
-        } else {
-          this.emit("transferCompleted");
-          this.emit("processFinished");
-        }        
-      }, this));
-      this.model.behaviours.done[action](_.bind(function() {
-        this.owner.childDone(this, "done", {
-          batch: this.model.batch,
-          user: this.owner.config.login
-        });
-      }, this));
-    }
+    this.model.operate(action, this.getRowsConnectedForOperations(), "A1").then(_.bind(function() {
+      if (action==="start") {
+        this.emit("processBegin");
+        this.emit("transferStarted");
+      } else {
+        this.emit("transferCompleted");
+        this.emit("processFinished");
+      }        
+    }, this));
+    this.model.behaviours.done[action](_.bind(function() {
+      this.owner.childDone(this, "done", {
+        batch: this.model.batch,
+        user: this.owner.config.login
+      });
+    }, this));
   }
-  
 });
