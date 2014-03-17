@@ -79,7 +79,7 @@ define([
       }
     };
 
-    ///initializeViz();
+    initializeViz();
 
     return {
       view:   view,
