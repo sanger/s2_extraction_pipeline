@@ -122,19 +122,17 @@ define([
                   return (item.uuid === labware.uuid);
                 });
               });
-              var lastEventPromise;
-              _.each(rolesForLabware, function(roleName) {
-                lastEventPromise = window.app.sendEvent(orderUUID, barcode, 'reset', roleName);
-                if (roleName.match(/samples.rack.stock/)) {
-                  window.app.sendEvent(orderUUID, barcode, 'start', roleName);
-                  lastEventPromise = window.app.sendEvent(orderUUID, barcode, 'complete', roleName);
-                }
-              });
-              if (typeof lastEventPromise !== 'undefined') {
-                lastEventPromise.then(function() {
-                  PubSub.publish("message.status.s2", this, {message: 'Rack with barcode '+barcode+' has been reset'});
+              _.chain(rolesForLabware).map(function(roleName) {
+                return window.app.sendEvent(orderUUID, barcode, 'reset', roleName).then(function() {
+                  if (roleName.match(/samples.rack.stock/)) {
+                    return window.app.sendEvent(orderUUID, barcode, 'start', roleName).then(function() {
+                      return window.app.sendEvent(orderUUID, barcode, 'complete', roleName);
+                    });
+                  }
                 });
-              }
+              }).last().value().then(function() {
+                PubSub.publish("message.status.s2", this, {message: 'Rack with barcode '+barcode+' has been reset'});
+              });;
             });
           });
         });
