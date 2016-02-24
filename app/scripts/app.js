@@ -110,6 +110,37 @@ define([
       })
     };
 
+    app.resetRackRoles = function(barcode) {
+      this.config.login = "admin@sanger.ac.uk";
+      return S2Root.load({user: { email: "admin@sanger.ac.uk"}}).then(function(root) {
+        return root.findByLabEan13(barcode).then(function(labware) {
+          return labware.orders().then(function(orders) {
+            return _.map(orders, function(order) {
+              var orderUUID = order.uuid;
+              var rolesForLabware = _.keys(order.items).filter(function(role) {
+                return _.some(order.items[role], function(item) {
+                  return (item.uuid === labware.uuid);
+                });
+              });
+              var lastEventPromise;
+              _.each(rolesForLabware, function(roleName) {
+                lastEventPromise = window.app.sendEvent(orderUUID, barcode, 'reset', roleName);
+                if (roleName.match(/samples.rack.stock/)) {
+                  window.app.sendEvent(orderUUID, barcode, 'start', roleName);
+                  lastEventPromise = window.app.sendEvent(orderUUID, barcode, 'complete', roleName);
+                }
+              });
+              if (typeof lastEventPromise !== 'undefined') {
+                lastEventPromise.then(function() {
+                  PubSub.publish("message.status.s2", this, {message: 'Rack with barcode '+barcode+' has been reset'});
+                });
+              }
+            });
+          });
+        });
+      });
+    };
+
     app.transferTube2Tube = function(barcodeSource, barcodeTarget, aliquotType) {
       return S2Root.load({user: { email: "admin@sanger.ac.uk"}}).then(function(root) {
         return $.when(root.findByLabEan13(barcodeSource),
@@ -194,6 +225,8 @@ define([
               }
             }
           });
+        }).then(function() {
+          PubSub.publish("message.status.s2", this, {message: 'Kit with barcode '+barcode+' created'});
         });
       });
     };
