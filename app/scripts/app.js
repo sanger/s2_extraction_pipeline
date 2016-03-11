@@ -109,6 +109,33 @@ define([
                   return (item.uuid === labware.uuid);
                 });
               });
+              // If none of the roles is a stock role, we have to create one
+              var aliquot = "";
+              if (_.all(rolesForLabware, function(roleName) {
+                return (!roleName.match(/samples.rack.stock/));
+              })) {
+                var aliquotTypes = _.chain(labware.tubes).pluck("aliquots").flatten().pluck("type").groupBy().keys();
+
+                var aliquotType;
+                if (aliquotTypes.any(function(type) { return (type==="DNA") }).value()) {
+                  aliquotType = "dna";
+                }
+                if (aliquotTypes.any(function(type) { return (type==="RNA") }).value()) {
+                  aliquotType = "rna";
+                }
+                // If it is none of these, then we cannot add a rack role
+                if (typeof aliquotType !== 'undefined') {
+                  var roleName = "samples.rack.stock." + aliquotType;
+                  window.app.sendEvent(orderUUID, barcode, 'start', roleName).then(function() {
+                    return window.app.sendEvent(orderUUID, barcode, 'complete', roleName);
+                  });
+                } else {
+                  // We cannot process this rack
+                  PubSub.publish("error.status.s2", this, {message: "The rack <"+barcode+"> has an aliquot type that is not allowed for resetting"});
+                  return;
+                }
+              }
+              // Normal process
               _.chain(rolesForLabware).map(function(roleName) {
                 return window.app.sendEvent(orderUUID, barcode, 'reset', roleName).then(function() {
                   if (roleName.match(/samples.rack.stock/)) {
@@ -122,6 +149,8 @@ define([
               });
             });
           });
+        }, function(error) {
+          PubSub.publish("error.status.s2", this, {message: 'Could not find rack with barcode '+barcode});
         });
       });
     };
