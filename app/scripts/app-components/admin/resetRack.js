@@ -9,7 +9,7 @@ define([
   return function(context) {
     var html = $(template(context));
     $("button", html).on("click", function() {
-      if (!$(".barcodes", html).val().match(/^(\d*\n)*\d*$/)) {
+      if (!$(".barcodes", html).val().match(/^(\d*\n)*\d+$/)) {
         PubSub.publish("error.status.s2", this, {message: 'Incorrect input (needs to be a list of numbers delimited by newlines)'});
         return;
       }

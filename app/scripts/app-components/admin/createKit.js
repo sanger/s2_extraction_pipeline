@@ -28,7 +28,7 @@ define([
           aliquot = getAliquotType(process),
           expires = $(".expires input", html).val(),
           amount = $(".amount input", html).val();
-      if (!barcode.match(/\d*/)) {
+      if (!barcode.match(/^\d+$/)) {
         PubSub.publish("error.status.s2", this, {message: "Incorrect barcode (must be a number without any other extra character, but was <"+barcode+">" });
         return;
       }
