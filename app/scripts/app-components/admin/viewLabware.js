@@ -1,16 +1,16 @@
-define([
-  "text!app-components/admin/_viewLabware.html",
-  ], function (viewLabware) {
+define([], function () {
   "use strict";
+  return function(partial) {
+    var html = $('');
 
-  var template= _.template(viewLabware);
-
-  return function(context) {
-    var html = $(template(context));
-
+    $(document).ready(function() {
+      $("a[href=#viewLabware]").click(function() {
+        window.location.href = '/s2_admin';
+      });
+    });
     return {
       view: html,
       events: {}
-    }
-  };
+    };
+  }
 });

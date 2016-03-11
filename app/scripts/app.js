@@ -15,6 +15,7 @@ define([
   "app-components/lab-management/lab-management",
   "app-components/lab-activities/lab-activities",
   "app-components/admin/admin",
+  "app-components/admin/viewLabware",
   "jquery_cookie",
 
   // Globally included stuff added after this comment
@@ -26,7 +27,7 @@ define([
   BusyBox, alerts, PubSub,
   BasePageModel,
   barcodeScanner,
-  LabMangement, LabActivities,Admin,
+  LabMangement, LabActivities,Admin,ViewLabware,
   Cookie
 ) {
   'use strict';
