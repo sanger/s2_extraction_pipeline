@@ -95,22 +95,36 @@ define([
       }, function() {
         console.log(arguments);
       });
-    }
+    };
 
-    app.resetReracking = function(barcode) {
+    app.resetRackRoles = function(barcode) {
       this.config.login = "admin@sanger.ac.uk";
       return S2Root.load({user: { email: "admin@sanger.ac.uk"}}).then(function(root) {
         return root.findByLabEan13(barcode).then(function(labware) {
           return labware.orders().then(function(orders) {
             return _.map(orders, function(order) {
-
-              order.sendEvent = _.bind(app.sendEvent, app, order.uuid, barcode);
-              return order;
+              var orderUUID = order.uuid;
+              var rolesForLabware = _.keys(order.items).filter(function(role) {
+                return _.some(order.items[role], function(item) {
+                  return (item.uuid === labware.uuid);
+                });
+              });
+              _.chain(rolesForLabware).map(function(roleName) {
+                return window.app.sendEvent(orderUUID, barcode, 'reset', roleName).then(function() {
+                  if (roleName.match(/samples.rack.stock/)) {
+                    return window.app.sendEvent(orderUUID, barcode, 'start', roleName).then(function() {
+                      return window.app.sendEvent(orderUUID, barcode, 'complete', roleName);
+                    });
+                  }
+                });
+              }).last().value().then(function() {
+                PubSub.publish("message.status.s2", this, {message: 'Rack with barcode '+barcode+' has been reset'});
+              });
             });
           });
-        })
-      })
-    }
+        });
+      });
+    };
 
     app.showOrdersUUID = function(barcode) {
       this.config.login = "admin@sanger.ac.uk";
