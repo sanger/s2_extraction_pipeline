@@ -75,11 +75,11 @@ define([
         return onReracking(html,model)
           .then(_.partial(success, "Re-racking was successful. Please print the label for the new rack"));
       }
-      
+
       html.trigger("start_process.busybox.s2");
 
       labelPrinter.beforePrint = beforePrint;
-      
+
       model.validateRackLayout(fileContent)
         .then(_.partial(createOutputRackAndSetupTransfers, html, factory, model))
         .then(_.partial(success, "File validated"))
@@ -136,17 +136,20 @@ define([
   }
 
   function presentRack(html, factory, representation) {
-    var outputLabware        = html.find(".output-labware");
+    //var outputLabware        = html.find(".output-labware");
+    var outputLabware        = $(".output-labware").hide();
     var outputRackController = factory(representation, outputLabware);
 
-    outputLabware.empty().show();
+    outputLabware.empty();
     outputRackController.renderView();
+    outputLabware.append("<a class='btn' href='/s2_admin/#labware/ean13/"+representation.barcode+"' target='_blank'>View in another window</a>");
     return outputRackController;
   }
 
   // LABEL PRINTING FUNCTIONS
   function onPrintLabels(html, model, printer) {
     html.trigger("labels.print.s2", [printer, [model.outputRack]]);
+    $(".output-labware").show();
     return model.outputRack;
   }
 
