@@ -46,6 +46,10 @@ define([
           friendly_name: "3421STDY",
           sanger_sample_id_core: "3421STDY"
         },
+        "CRUK-Pilot-ORG": {
+          friendly_name: "CRUK-Pilot-ORG",
+          sanger_sample_id_core: "ORG"
+        },
         EBISC_C: {
           friendly_name: "EBISC_C",
           sanger_sample_id_core: "EBISC_C"
