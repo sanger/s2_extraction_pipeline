@@ -50,6 +50,10 @@ define([
           friendly_name: "CRUK-Pilot-ORG",
           sanger_sample_id_core: "ORG"
         },
+        "MICA_collection": {
+          friendly_name: "MICA - Loss of pluriotency_collection",
+          sanger_sample_id_core: "MICA_collection"
+        },
         EBISC_C: {
           friendly_name: "EBISC_C",
           sanger_sample_id_core: "EBISC_C"
