@@ -151,6 +151,10 @@ define([
           friendly_name: "Skin Biopsy Collection",
           sanger_sample_id_core: "SBC"
         },
+        "Th2": {
+          friendly_name: "Th2 - ILC T helper Cell differentiation",
+          sanger_sample_id_core: "Th2"
+        },
 
         Th2diff: {
           friendly_name: "Th2diff",
