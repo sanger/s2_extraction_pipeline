@@ -156,7 +156,7 @@ define([
           sanger_sample_id_core: "Th2"
         },
         "HGII": {
-          friendly_name: "Human Cellular Genetics of Innate Immunity",
+          friendly_name: "HGII - Human Cellular Genetics of Innate Immunity",
           sanger_sample_id_core: "HGII"
         },
 
