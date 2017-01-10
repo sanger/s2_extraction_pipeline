@@ -155,6 +155,10 @@ define([
           friendly_name: "Th2 - ILC T helper Cell differentiation",
           sanger_sample_id_core: "Th2"
         },
+        "HGII": {
+          friendly_name: "Human Cellular Genetics of Innate Immunity",
+          sanger_sample_id_core: "HGII"
+        },
 
         Th2diff: {
           friendly_name: "Th2diff",
