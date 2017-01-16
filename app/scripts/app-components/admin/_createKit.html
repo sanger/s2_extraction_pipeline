@@ -3,16 +3,20 @@
 barcode: <input type="text" value="" />
 </div>
 <div class="process">
-process: <input type="text" value="DNA & RNA extraction" />
+  process:
+<select>
+  <option value="DNA & RNA extraction">DNA & RNA extraction</option>
+  <option value="DNA only">DNA only</option>
+  <option value="RNA only">RNA only</option>
+  <option value="DNA purification">DNA purification</option>
+</select>
 </div>
-<div class="aliquot_type">
-aliquot_type: <input type="text" value="DNA & RNA" />
+<div class="expires hidden">
+expires: <input type="hidden" value="2050-05-01" />
 </div>
-<div class="expires">
-expires: <input type="text" value="2015-05-01" />
+<div class="amount hidden">
+amount: <input type="hidden" value="100" />
 </div>
-<div class="amount">
-amount: <input type="text" value="10" />
-</div>
-<button>Create</button>
+<button class="btn btn-default">Create</button>
+<div><i>Important: After clicking the button, please wait until receiving the confirmation of the creation. It can take a while.</i></div>
 </div>

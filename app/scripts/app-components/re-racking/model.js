@@ -176,14 +176,14 @@ define([
       var tubeCountByRackUuid = tubeCountPerRack(this.inputRacks);
 
       this._ordersForMovedTubes = {};
-      
+
       // This reduce produces source move JSON for all tubes potentially
       // all the tubes in the input racks.
       var sourceMoves = _.reduce(this.inputRacks, mapBarcodeToSource, {});
-      
+
       this._ordersForMovedTubes = _.reduce(this.inputRacks, function(memo, rack) {
         _.each(_.keys(targetsByBarcode), function(targetTubeBarcode) {
-          var tube = _.find(rack.tubes, function(tube) { 
+          var tube = _.find(rack.tubes, function(tube) {
             return (targetTubeBarcode === tube.labels.barcode.value);
           });
           if (_.isUndefined(tube)) {
@@ -193,14 +193,14 @@ define([
           if (_.isUndefined(memo[rack.uuid])) {
             memo[rack.uuid]=[];
           }
-          memo[rack.uuid] = memo[rack.uuid].concat(orderPromisesForTube(rack, tube));          
+          memo[rack.uuid] = memo[rack.uuid].concat(orderPromisesForTube(rack, tube));
         });
         return memo;
       }, {});
-      
-      
+
+
       this.buildRackOrderRoleChanges(targetsByBarcode);
-      
+
       this.tubeMoves = _.reduce(
         targetsByBarcode,
         function(memo, targetLocation, tubeBarcode){
@@ -219,7 +219,7 @@ define([
       this._oUuidToTubes = {};
       this._oUuidToMovedTubes = {};
       this._emptyRacksByOrder = {};
-      // Compares tubes moved with tubes in rack. If, for a particular order, both lists 
+      // Compares tubes moved with tubes in rack. If, for a particular order, both lists
       // are equal, then the rack can be unused for that order (as all tubes of that order
       // will not be nomore inside the rack after the reracking)
       _.each(this.inputRacks, _.bind(function(rack) {
@@ -243,7 +243,7 @@ define([
             if (_.isUndefined(this._oUuidToTubes[order.uuid])) {
               this._oUuidToTubes[order.uuid]=[];
             }
-            this._oUuidToTubes[order.uuid]= this._oUuidToTubes[order.uuid].concat(tube);            
+            this._oUuidToTubes[order.uuid]= this._oUuidToTubes[order.uuid].concat(tube);
           }, this));
           return this;
         }, this))).then(_.bind(function() {
@@ -405,11 +405,11 @@ define([
       tubesMemo[tube.labels.barcode.value] = {
         "source_uuid":      rack.uuid,
         "source_location":  sourceLocation,
-      };      
+      };
       return _.extend(memo, tubesMemo);
     }, {});
   }
-  
+
   function orderPromisesForTube(rack, tube) {
     return rack.root.find(tube.uuid).then(function(labware) {
       return labware.orders();
