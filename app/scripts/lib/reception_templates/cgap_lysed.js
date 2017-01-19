@@ -170,7 +170,7 @@ define([
           sanger_sample_id_core: "Ext_Test"
         },
         "TIL": {
-          friendly_name: "Tumour infiltrating leukocytes",
+          friendly_name: "TIL - Tumour infiltrating leukocytes",
           sanger_sample_id_core: "TIL"
         },
         "EPAS1_RNA": {
