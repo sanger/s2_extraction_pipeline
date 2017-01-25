@@ -11,9 +11,9 @@ define([
   return function(context) {
     return new ProcessChoice(_.extend({
       components: [
-        //{label: "Status", id: "status", constructor: StatusMgmt},
+        {label: "Status", id: "status", constructor: StatusMgmt},
         {label: "Create Kit", id: "createKit", constructor: CreateKit},
-        //{label: "Add role", id: "addRole", constructor: AddRole},
+        {label: "Add role", id: "addRole", constructor: AddRole},
         {label: "Reset racks", id: "resetRack", constructor: ResetRack},
         {label: "View labware", id: "viewLabware", constructor: ViewLabware}
       ]
