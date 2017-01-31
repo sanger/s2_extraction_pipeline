@@ -97,6 +97,7 @@
       "rowBehaviour":  "bedVerification",
       "input":         {
         "role": "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna.batched",
+        "uniqueForOrder": true,
         "model":"tube_racks",
         "title": "Volume Checked RNA Rack",
         "bedTracking": true

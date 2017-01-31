@@ -97,6 +97,7 @@
       "input":         {
         "role": "samples.qc.volume_checked_stock_rack_dna.batched",
         "model":"tube_racks",
+        "uniqueForOrder": true,
         "title": "Volume Checked DNA Rack",
         "bedTracking": true
       },

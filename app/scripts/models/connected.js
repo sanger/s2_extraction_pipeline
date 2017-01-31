@@ -105,6 +105,15 @@ define([
       .then(_.bind(function(root){
         // Becareful! inputs is not a promise!
         return model.inputs.then(_.bind(function(inputs) {
+          if (model.config.input.uniqueForOrder===true) {
+            var inputsToCreate = _.reduce(inputs, function(memo, input) {
+              if (!memo[input.uuid]) {
+               memo[input.uuid] = input
+              }
+              return memo;
+            }, {}, this);
+            inputs = _.values(inputsToCreate);
+          }
           model.owner.rowControllers = _.chain(inputs).map(_.bind(function (input, index) {
             input = reset ? undefined : input;
             var rowController =
