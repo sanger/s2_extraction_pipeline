@@ -55,7 +55,9 @@ define([
       .then(function storeRack(returnedRack) {
         rack = returnedRack;
         // We should only check the orders of the tubes inside my rack
-        return $.when.apply(this, rack.allOrdersFromTubes());
+        //return $.when.apply(this, rack.allOrdersFromTubes());
+        return rack.orders();
+        return $.when.apply(this, rack.orders());
       }, function () {
         return deferred.reject({message:"Couldn't find the rack."});
       })
