@@ -97,6 +97,23 @@ define([
       });
     };
 
+    window.app.connectedTubesForTube = function(barcode) {
+      return window.app.connectedTubes('2880918273769').then(function() {
+        return window.app.sampleForTube(barcode).then(function(e) {
+          console.log(myConnectedTable[e[0].sample.uuid]);
+        });        
+      })
+    };
+
+
+    window.app._connectedTubesForTube = function(barcode) {
+      return window.app.sampleForTube(barcode).then(function(e) {
+        console.log(myConnectedTable[e[0].sample.uuid]);
+      });        
+    };
+
+    
+
     window.app.duplicated =function(barcode) {
       require(["mapper/s2_root"], function(S2Root) { 
       window.myConnectedTable = {};
@@ -139,6 +156,18 @@ define([
 
       });
     }
+
+    app.sampleForTube = function(barcode) {
+      return S2Root.
+        load({user: {email: "admin@sanger.ac.uk"}}).
+        then(function(root) {
+          return root.findByLabEan13(barcode).then(function(labware) {
+            return _.filter(labware.aliquots, function(aliquot) {
+              return !!aliquot.sample
+            });
+          });
+        });
+    };
 
     app.connectedTubes = function(barcode) {
       /**
