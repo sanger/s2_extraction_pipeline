@@ -105,7 +105,7 @@ define([
       .then(_.bind(function(root){
         // Becareful! inputs is not a promise!
         return model.inputs.then(_.bind(function(inputs) {
-          if (model.config.input.uniqueForOrder===true) {
+          if (true===true) {
             var inputsToCreate = _.reduce(inputs, function(memo, input) {
               if (!memo[input.uuid]) {
                memo[input.uuid] = input
@@ -349,7 +349,14 @@ define([
         var sourceToOrder = _
         .chain(items)
         .reduce(function(memo, item) {
-          memo[item.uuid] = item.order;
+          if (!memo[item.uuid]) {
+            memo[item.uuid] = [];
+          }
+          if (_.filter(memo[item.uuid], function(o) {
+            return (o.uuid === item.order.uuid);
+          }).length === 0) {
+            memo[item.uuid].push(item.order);
+          }
           return memo;
         }, {})
         .value();
@@ -375,22 +382,23 @@ define([
               // if not_batch === undefined -> model.batch.uuid
               
               var batchUUID = (!model.config.output[index].not_batched) ? model.batch.uuid : undefined;
-              return {
-                input: {
-                  resource: source,
-                  role: model.config.input.role,
-                  order: sourceToOrder[source.uuid]
-                },
-                output: {
-                  resource: destination,
-                  role: model.config.output[index].role,
-                  batch: batchUUID
-                },
-                fraction:     1.0,
-                aliquot_type: model.config.output[index].aliquotType
-              };
-            })
-            .value();
+              return _.map(sourceToOrder[source.uuid], function(order) {
+                return {
+                  input: {
+                    resource: source,
+                    role: model.config.input.role,
+                    order: order
+                  },
+                  output: {
+                    resource: destination,
+                    role: model.config.output[index].role,
+                    batch: batchUUID
+                  },
+                  fraction:     1.0,
+                  aliquot_type: model.config.output[index].aliquotType
+                };
+              });
+            }).flatten().value();
 
             if (isSameInputToOutput) {
               memo.push(transferDetails);
@@ -542,7 +550,9 @@ define([
         return item.role === model.config.input.role && item.status === "done";
       }).map(function(item) {
         return model.cache.fetchResourcePromiseFromUUID(item.uuid).then(function(resource) {
-          inputs.push(resource);
+          if (inputs.filter(function(i) { return (i.uuid==resource.uuid);}).length == 0) {
+            inputs.push(resource);
+          }
         });
       }).value()).then(function() {
         model.inputs.resolve(inputs);

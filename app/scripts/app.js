@@ -97,6 +97,95 @@ define([
       });
     };
 
+    window.app.duplicated =function(barcode) {
+      require(["mapper/s2_root"], function(S2Root) { 
+      window.myConnectedTable = {};
+      return S2Root.
+        load({user: {email: "admin@sanger.ac.uk"}}).
+        then(function(root) {
+          return root.findByLabEan13(barcode).then(function(labware) {
+            return labware.orders().then(function(orders) {
+              return _.map(orders, function(order) {
+                var tableObj = {};
+                return _.chain(order.items).pairs().map(function(list){
+                  var role = list[0];
+                  var nodes = list[1];
+                  return _.map(nodes, function(node) {
+                    return root.find(node.uuid).then(function(tube) {
+                      return _.reduce(tube.aliquots, function(table, aliquot) {
+                        if (!!aliquot.sample) {
+                          if (!table[aliquot.sample.uuid]) {
+                            window.myConnectedTable[aliquot.sample.uuid] = {};
+                            table[aliquot.sample.uuid] = {};
+                          }
+                          if (!table[aliquot.sample.uuid][role]) {
+                            window.myConnectedTable[aliquot.sample.uuid][role] = [];
+                            table[aliquot.sample.uuid][role] = [];
+                          }
+                          table[aliquot.sample.uuid][role].push(tube.labels.barcode.value);
+                          window.myConnectedTable[aliquot.sample.uuid][role].push(tube.labels.barcode.value);
+                        }
+                        return table;
+                      }, tableObj);
+                    });
+                  });
+                }).value();
+              });
+            });
+          });
+        }).then(function(table) {
+          console.log(table);
+        });
+
+      });
+    }
+
+    app.connectedTubes = function(barcode) {
+      /**
+      * First attempt of creating a report with the status of all the tubes related with the barcode
+      * provided.
+      **/
+      window.myConnectedTable = {};
+      return S2Root.
+        load({user: {email: "admin@sanger.ac.uk"}}).
+        then(function(root) {
+          return root.findByLabEan13(barcode).then(function(labware) {
+            return labware.orders().then(function(orders) {
+              return _.map(orders, function(order) {
+                var tableObj = {};
+                return _.chain(order.items).pairs().map(function(list){
+                  var role = list[0];
+                  var nodes = list[1];
+                  return _.map(nodes, function(node) {
+                    return root.find(node.uuid).then(function(tube) {
+                      return _.reduce(tube.aliquots, function(table, aliquot) {
+                        if (!!aliquot.sample) {
+                          if (!table[aliquot.sample.uuid]) {
+                            window.myConnectedTable[aliquot.sample.uuid] = {};
+                            table[aliquot.sample.uuid] = {};
+                          }
+                          if (!table[aliquot.sample.uuid][role]) {
+                            window.myConnectedTable[aliquot.sample.uuid][role] = [];
+                            table[aliquot.sample.uuid][role] = [];
+                          }
+
+                          table[aliquot.sample.uuid][role].push(tube.labels.barcode.value);
+                          window.myConnectedTable[aliquot.sample.uuid][role].push(tube.labels.barcode.value);
+                        }
+                        return table;
+                      }, tableObj);
+                    });
+                  });
+                }).value();
+              });
+            });
+          });
+        }).then(function(table) {
+          console.log(table);
+        });
+    };
+
+
     app.resetRackRoles = function(barcode) {
       this.config.login = "admin@sanger.ac.uk";
       return S2Root.load({user: { email: "admin@sanger.ac.uk"}}).then(function(root) {
