@@ -1,9 +1,9 @@
 {
   "role_priority": [
-   "samples.rack.stock.dna",
    "samples.qc.volume_checked_stock_rack_dna.batched",
    "samples.qc.volume_checked_stock_rack_dna",
-   "samples.qc.nx_working_dilution_dna"
+   "samples.qc.nx_working_dilution_dna",
+   "samples.rack.stock.dna"   
   ],
 
   "workflows": [

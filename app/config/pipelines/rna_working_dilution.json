@@ -1,10 +1,10 @@
 {
   "role_priority": [
-   "samples.rack.stock.rna",
+   
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna.batched",
    "samples.qc.nx_nanodrop.volume_checked_stock_rack_rna",
-   "samples.qc.nx_nanodrop.working_dilution_rna"
-
+   "samples.qc.nx_nanodrop.working_dilution_rna",
+    "samples.rack.stock.rna"
   ],
 
   "workflows": [

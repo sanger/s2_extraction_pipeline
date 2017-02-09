@@ -119,16 +119,19 @@ define([
         })
         .then(function () {
           return $.when.apply(null, _.map(inputs, function (input) {
-            return input.order()
+            return input.orders()
               .fail(function () {
                 deferred.reject({
                   message: "Couldn't load one of the orders! Contact the administrator of the system."
                 });
               })
-              .then(function (order) {
-                itemsByOrderUUID[order.uuid] = itemsByOrderUUID[order.uuid] || { order:order, items: []};
-                var labware = _.find(order.items[thisModel.config.input.role], function(labware) { return labware.status === "done" && labware.uuid === input.uuid; } );
-                itemsByOrderUUID[order.uuid].items.push(labware);
+              .then(function (orders) {
+                _.each(orders, function(order) {
+                  itemsByOrderUUID[order.uuid] = itemsByOrderUUID[order.uuid] || { order:order, items: []};
+                  var labware = _.find(order.items[thisModel.config.input.role], function(labware) { return labware.status === "done" && labware.uuid === input.uuid; } );
+                  itemsByOrderUUID[order.uuid].items.push(labware);                  
+                });
+                return itemsByOrderUUID;
               });
           }));
         })
@@ -137,7 +140,7 @@ define([
             message:"Couldn't load the orders. Contact the administrator of the system."
           });
         })
-        .then(function(){
+        .then(function(itemsByOrderUUID){
           _.each(itemsByOrderUUID, function (orderKey) {
             _.each(orderKey.items, function (item) {
               addingRoles.updates.push({
@@ -249,6 +252,15 @@ define([
               .value());
         })
         .then(function () {
+
+            var inputsToCreate = _.reduce(inputs, function(memo, input) {
+              if (!memo[input.uuid]) {
+               memo[input.uuid] = input
+              }
+              return memo;
+            }, {}, this);
+            inputs = _.values(inputsToCreate);
+          
           return that.inputs.resolve(inputs);
         })
         .fail(that.inputs.reject);

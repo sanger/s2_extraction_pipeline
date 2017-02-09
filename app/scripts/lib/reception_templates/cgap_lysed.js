@@ -176,6 +176,10 @@ define([
         "EPAS1_RNA": {
           friendly_name: "Functional validation of EPAS1 variants",
           sanger_sample_id_core: "EPAS1_RNA"
+        },
+        "3486STDY": {
+          friendly_name: "Evolution and regulation in mammalian immunity - Human",
+          sanger_sample_id_core: "3486STDY"
         }
 
       },
