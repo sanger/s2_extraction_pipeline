@@ -27,6 +27,12 @@ define([ 'text!pipeline_config-DO_NOT_DIRECTLY_EDIT.json' ], function (pipelineJ
       return new $.Deferred().reject("This labware is not in use anymore.");
     }
 
+    if (items.length>1) {
+      if (_.chain(items).pluck('role').uniq().value().length != 1) {
+        return new $.Deferred().reject("This labware has two or more different roles active. We cannot select a workflow from it. Please contact administrator");   
+      }
+    }
+
     var activeRole     = _.chain(pipelineConfig.role_priority).find(firstMatchingRoleOnItems(items)).value();
 
     var foundWorkflows = pipelineConfig.workflows.filter(function(workflow) {
@@ -53,10 +59,12 @@ define([ 'text!pipeline_config-DO_NOT_DIRECTLY_EDIT.json' ], function (pipelineJ
 
     if (!model.batch && !model.labware) return $.Deferred().resolve().promise();
     if (!model.batch) {
-      itemsPromise = model.labware.order().then(function(order) {
-        return order.items.filter(function(item){
-          return item.uuid === model.labware.uuid;
-        });
+      itemsPromise = model.labware.orders().then(function(orders) {
+        return _.chain(orders).map(function(order) {
+          return order.items.filter(function(item){
+            return item.uuid === model.labware.uuid;
+          });
+        }).flatten().value();
       });
     } else {
       itemsPromise = model.batch.items;
