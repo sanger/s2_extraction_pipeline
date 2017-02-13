@@ -27,11 +27,11 @@ define([ 'text!pipeline_config-DO_NOT_DIRECTLY_EDIT.json' ], function (pipelineJ
       return new $.Deferred().reject("This labware is not in use anymore.");
     }
 
-    if (items.length>1) {
+    /*if (items.length>1) {
       if (_.chain(items).pluck('role').uniq().value().length != 1) {
         return new $.Deferred().reject("This labware has two or more different roles active. We cannot select a workflow from it. Please contact administrator");   
       }
-    }
+    }*/
 
     var activeRole     = _.chain(pipelineConfig.role_priority).find(firstMatchingRoleOnItems(items)).value();
 
