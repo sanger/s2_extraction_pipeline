@@ -275,7 +275,7 @@
             "model":       "tubes",
             "title":       "2D Extracted RNA Tube",
             "validation":  "2D_tube",
-            "not_batched": false
+            "not_batched": true
           }
         ]
       }
@@ -318,7 +318,7 @@
             "model":      "tubes",
             "title":      "2D Extracted DNA Tube",
             "validation": "2D_tube",
-            "not_batched": false
+            "not_batched": true
           }
         ]
       }

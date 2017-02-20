@@ -62,7 +62,6 @@ define([
             deferred.reject({message: "Couldn't load the batch resource"});
           })
           .then(function () {
-            //return setupOutputs(thisModel);
             // FIXME: 
             // When the outputs are not in a batch (because maybe they need to be solved
             // individually in next steps) we have the problem that we don't know to which inputs
