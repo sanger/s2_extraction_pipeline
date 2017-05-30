@@ -177,6 +177,10 @@ define([
           friendly_name: "Functional validation of EPAS1 variants",
           sanger_sample_id_core: "EPAS1_RNA"
         },
+        "DDD_2MUS": {
+          friendly_name: "RNASeq of mouse DD models II",
+          sanger_sample_id_core: "DDD_2MUS"          
+        },
         "3486STDY": {
           friendly_name: "Evolution and regulation in mammalian immunity - Human",
           sanger_sample_id_core: "3486STDY"
