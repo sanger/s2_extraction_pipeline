@@ -232,7 +232,7 @@ define([
       var reader = new FileReader();
       reader.addEventListener("loadend", function() {
         // Currently HTML5 Anchor download attribute is ignored by Safari browsers, so
-        // there is no way to make Safari force a filename if it is not performed with 
+        // there is no way to make Safari force a filename if it is not performed with
         // right-button and "Save link as".
         var dataURL=reader.result;
         var anchor = manifestAnchor.attr("href", dataURL).attr("download", "manifest.xls");
@@ -242,7 +242,7 @@ define([
     } else {
       saveAs(source.data("manifest"), "manifest.xls");
     }
-    button.prop("disabled", false);    
+    button.prop("disabled", false);
   }
 
   function GenerateSamples(context, root, details) {
@@ -340,7 +340,7 @@ define([
 
   function createForm(xls, csv) {
     var form = new FormData();
-    form.append("template", xls);
+    form.append("template", new Blob([xls]));
     form.append("manifest-details", new Blob([csv], {type:"text/csv"}));
     return form;
   }
@@ -359,11 +359,11 @@ define([
 
       var builder = _.compose(
         function(resource) {
-          
+
           function matcher(barcode) {
             return barcode.uuid === sampleFor(resource).uuid;
           }
-          
+
           resource.labels = _.find(sampleBarcodes, matcher).labels;
 
           sampleBarcodes = _.rejectFirst(sampleBarcodes, matcher);
